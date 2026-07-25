@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Coach J. San Diego — Platform</title>
+<meta name="theme-color" content="#f5f7fb" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%238b2fd6'/><text x='50' y='68' font-size='54' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>J</text></svg>" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --blue:#8b2fd6; --blue-2:#9d4ee0; --blue-050:#f3ebfc;
+  --ink:#0a0d14; --slate:#4a5163; --gray:#8b91a1; --line:#e7eaf1; --mist:#f5f7fb; --white:#fff;
+  --green:#16b8a6; --amber:#ff9f43; --red:#ff5a5f;
+  --r:14px; --r-lg:20px; --sh:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05);
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --display:"Sora","Inter",sans-serif; --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--mist);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+::selection{background:var(--blue);color:#fff}
+h1,h2,h3,h4{font-family:var(--display);letter-spacing:-.02em;line-height:1.15}
+.muted{color:var(--gray)}
+img{display:block;max-width:100%}
+
+/* shell */
+.shell{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+.side{background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;padding:18px 14px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:1.15rem;padding:6px 8px 16px}
+.brand .m{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--blue);color:#fff;font-weight:800;box-shadow:0 8px 20px rgba(139,47,214,.35)}
+.brand span{color:var(--blue)}
+.role-chip{margin:0 8px 14px;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);background:var(--blue-050);padding:6px 10px;border-radius:8px;display:inline-block;width:fit-content}
+.nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.nav a{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:10px;font-weight:500;font-size:.92rem;color:var(--slate);transition:background .15s,color .15s}
+.nav a svg{width:18px;height:18px;flex-shrink:0;opacity:.8}
+.nav a:hover{background:var(--mist)}
+.nav a.active{background:var(--blue-050);color:var(--blue);font-weight:600}
+.nav a.active svg{opacity:1}
+.side-foot{border-top:1px solid var(--line);padding-top:12px;margin-top:6px}
+.switcher{display:flex;background:var(--mist);border-radius:10px;padding:3px;margin-bottom:10px}
+.switcher button{flex:1;font-size:.72rem;font-weight:600;padding:7px 4px;border-radius:8px;color:var(--gray)}
+.switcher button.on{background:#fff;color:var(--ink);box-shadow:var(--sh)}
+.user{display:flex;align-items:center;gap:10px;padding:6px 8px}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:.8rem;flex-shrink:0;background:linear-gradient(140deg,#9d4ee0,#4a1a86)}
+.user .n{font-size:.85rem;font-weight:600;line-height:1.2}
+.user .e{font-size:.72rem;color:var(--gray)}
+
+/* main */
+.main{min-width:0}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(245,247,251,.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:14px 28px}
+.topbar h1{font-size:1.3rem}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;color:var(--gray);font-size:.85rem;min-width:200px}
+.search svg{width:15px;height:15px}
+.icon-btn{width:38px;height:38px;border-radius:10px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;color:var(--slate)}
+.icon-btn svg{width:18px;height:18px}
+.content{padding:28px}
+.wrapx{max-width:1100px;margin:0 auto}
+
+/* primitives */
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh)}
+.pad{padding:22px}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.row{display:flex;align-items:center;gap:12px}
+.between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:.88rem;padding:10px 16px;border-radius:10px;background:var(--blue);color:#fff;transition:.15s;box-shadow:0 6px 16px rgba(139,47,214,.28)}
+.btn:hover{background:var(--blue-2)}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.btn.ghost:hover{border-color:var(--ink)}
+.btn.sm{padding:7px 12px;font-size:.8rem}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;padding:4px 10px;border-radius:100px;background:var(--mist);color:var(--slate)}
+.pill.blue{background:var(--blue-050);color:var(--blue)}
+.pill.green{background:rgba(22,184,166,.12);color:#0e8b7e}
+.pill.amber{background:rgba(255,159,67,.14);color:#c9741a}
+.pill.red{background:rgba(255,90,95,.12);color:#d63b40}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray)}
+.big{font-family:var(--display);font-weight:800;font-size:2rem;letter-spacing:-.03em;line-height:1}
+.sub{font-size:.82rem;color:var(--gray);margin-top:4px}
+.divide{height:1px;background:var(--line);margin:16px 0}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line)}
+td{padding:12px;border-bottom:1px solid var(--line);font-size:.88rem}
+tr:last-child td{border-bottom:none}
+.trow:hover{background:var(--mist);cursor:pointer}
+.progress{height:8px;border-radius:100px;background:var(--mist);overflow:hidden}
+.progress i{display:block;height:100%;background:var(--blue);border-radius:100px}
+.progress i.g{background:var(--green)}.progress i.a{background:var(--amber)}
+.check{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;flex-shrink:0;transition:.15s}
+.check.done{background:var(--green);border-color:var(--green);color:#fff}
+.task{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.task:last-child{border-bottom:none}
+.ring{transform:rotate(-90deg)}
+.list-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.list-item:last-child{border-bottom:none}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.tag{font-size:.7rem;font-weight:600;color:var(--gray);background:var(--mist);padding:3px 8px;border-radius:6px}
+.hero-day{background:repeating-linear-gradient(45deg,rgba(197,155,242,.09) 0 1px,transparent 1px 42px),repeating-linear-gradient(-45deg,rgba(197,155,242,.09) 0 1px,transparent 1px 42px),linear-gradient(135deg,#1a0b2e,#3a1a7a);color:#fff;border:none}
+.hero-day .eyebrow{color:#c9a8ee}
+.msg{display:flex;gap:10px;margin-bottom:14px}
+.msg .bubble{background:var(--mist);padding:10px 14px;border-radius:14px;font-size:.88rem;max-width:75%}
+.msg.me{flex-direction:row-reverse}
+.msg.me .bubble{background:var(--blue);color:#fff}
+.kpi .big{font-size:1.7rem}
+.stack-mod{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:8px;font-size:.85rem;font-weight:500}
+.stack-mod .h{margin-left:auto;color:var(--gray);cursor:grab}
+.chip-add{border:1px dashed var(--line);color:var(--blue);border-radius:12px;padding:11px;text-align:center;font-weight:600;font-size:.85rem;cursor:pointer}
+.seg{display:inline-flex;background:var(--mist);border-radius:10px;padding:3px}
+.seg button{font-size:.8rem;font-weight:600;padding:6px 14px;border-radius:8px;color:var(--gray)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:var(--sh)}
+.mobile-only{display:none}
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;left:0;top:0;z-index:50;width:250px;transform:translateX(-100%);transition:transform .3s var(--ease);box-shadow:0 20px 60px rgba(0,0,0,.2)}
+  body.menu .side{transform:none}
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .content{padding:18px}
+  .mobile-only{display:grid}
+  .search{display:none}
+  .backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:40}
+  body.menu .backdrop{display:block}
+}
+/* auth */
+body.auth #app{display:block}
+body.auth .backdrop{display:none!important}
+.auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:repeating-linear-gradient(45deg,rgba(197,155,242,.08) 0 1px,transparent 1px 44px),repeating-linear-gradient(-45deg,rgba(197,155,242,.08) 0 1px,transparent 1px 44px),radial-gradient(90% 60% at 50% 0%,#3a1170,transparent 60%),#1a0b2e}
+.auth-wrap .sub a{color:#c79bf2}
+.auth-card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 20px 60px rgba(16,24,40,.12);padding:34px;width:100%;max-width:390px}
+.auth-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:600;font-size:.9rem;margin-bottom:10px;transition:.15s}
+.auth-btn:hover{background:var(--mist)}
+.auth-or{display:flex;align-items:center;gap:12px;color:var(--gray);font-size:.78rem;margin:14px 0}
+.auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.auth-input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:.9rem;margin-bottom:10px;font-family:inherit}
+.auth-input:focus{outline:2px solid var(--blue);border-color:var(--blue)}
+.auth-link{font-size:.8rem;color:var(--gray);font-weight:500}
+.auth-link:hover{color:var(--blue)}
+.signout{margin-left:auto;color:var(--gray);font-size:.75rem;cursor:pointer}
+.signout:hover{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="backdrop" onclick="document.body.classList.remove('menu')"></div>
+<div id="app" class="shell"></div>
+<script>
+/* ============ MOCK DATA ============ */
+const DATA = {
+  client:{name:"Alex Rivera",email:"alex@email.com",initials:"AR",goal:"Fat loss",coach:"Coach J. San Diego",
+    streak:24,weight:[214,211,209,208,205,203,201,199,197,196],startW:214,curW:196,goalW:185,
+    water:{cur:2.1,goal:3},
+    workout:{name:"Upper Body — Push",dur:"45 min",done:false,exercises:[
+      {n:"Barbell Bench Press",s:"4 × 8",r:"90s"},{n:"Incline DB Press",s:"3 × 10",r:"75s"},
+      {n:"Overhead Press",s:"3 × 8",r:"90s"},{n:"Cable Fly",s:"3 × 12",r:"60s"},
+      {n:"Triceps Rope Pushdown",s:"3 × 15",r:"45s"}]},
+    meals:[{n:"Breakfast — Greek yogurt bowl",k:420,done:true},{n:"Lunch — Chicken & rice",k:610,done:true},
+      {n:"Snack — Protein shake",k:220,done:false},{n:"Dinner — Salmon & greens",k:540,done:false}],
+    macros:{cal:1790,calGoal:2100,p:165,c:180,f:55},
+    habits:[{n:"10k steps",done:true},{n:"Sleep 7+ hrs",done:true},{n:"Log all meals",done:false},{n:"No late-night snacking",done:false}],
+    appt:{when:"Thu, 2:30 PM",type:"Weekly video check-in"},
+    coachMsg:"Great work hitting your protein all week 💪 Let's push a little harder on steps this weekend — you've got this."},
+  clients:[
+    {n:"Alex Rivera",in:"AR",goal:"Fat loss",adh:92,checkin:"2h ago",status:"on-track",tier:"Hybrid"},
+    {n:"Maria Chen",in:"MC",goal:"Muscle",adh:78,checkin:"1d ago",status:"on-track",tier:"Workout"},
+    {n:"James Park",in:"JP",goal:"Fat loss",adh:64,checkin:"3d ago",status:"needs-nudge",tier:"Nutrition"},
+    {n:"Dana Kim",in:"DK",goal:"Recomp",adh:96,checkin:"5h ago",status:"on-track",tier:"Hybrid"},
+    {n:"Tom Ellis",in:"TE",goal:"Fat loss",adh:41,checkin:"6d ago",status:"at-risk",tier:"Hybrid"},
+    {n:"Priya Shah",in:"PS",goal:"Toning",adh:88,checkin:"1d ago",status:"on-track",tier:"Nutrition"},
+    {n:"Chris Vale",in:"CV",goal:"Performance",adh:83,checkin:"2d ago",status:"on-track",tier:"Workout"},
+    {n:"Elena Rossi",in:"ER",goal:"Lifestyle",adh:71,checkin:"4d ago",status:"needs-nudge",tier:"Hybrid"}],
+  coaches:[
+    {n:"Coach J. San Diego",in:"JS",clients:128,retention:94,role:"Head Coach"},
+    {n:"Sam Doyle",in:"SD",clients:64,retention:89,role:"Coach"},
+    {n:"Nina Alvarez",in:"NA",clients:52,retention:91,role:"Coach"}],
+  stacks:["Workout Program","Nutrition Plan","Habit Program","Cardio Program","Mobility","Recovery",
+    "Supplement Guide","Challenge","Education Videos","Check-in Schedule","Mindset Lessons","Recipe Collection"],
+  products:[
+    {n:"Hybrid Coaching",type:"Subscription",price:"$349/mo",active:214},
+    {n:"Nutrition Coaching",type:"Subscription",price:"$199/mo",active:180},
+    {n:"Workout Coaching",type:"Subscription",price:"$179/mo",active:96},
+    {n:"12-Week Shred",type:"One-time",price:"$49",active:0},
+    {n:"Complete Bundle",type:"One-time",price:"$129",active:0}]
+};
+
+/* ============ ICONS ============ */
+const I={
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>',
+  dumbbell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 9v6M5 7v10M19 7v10M22 9v6M7 12h10"/></svg>',
+  meal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 3v7a3 3 0 0 0 6 0V3M7 3v18M17 3c-1.5.5-2 3-2 5s.5 3 2 3v10"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>',
+  card:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>',
+  users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3 2.7-5 6-5s6 2 6 5"/><path d="M16 5.5a3 3 0 0 1 0 5.5M21 20c0-2.4-1.6-4.3-4-4.8"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>',
+  grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
+  layers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5z"/><path d="M2 13l10 5 10-5M2 18l10 5 10-5"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 8h18s-3-1-3-8M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+  menu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>'
+};
+
+/* ============ NAV CONFIG ============ */
+const NAV={
+  client:[["today","Today",I.home],["workouts","Workouts",I.dumbbell],["nutrition","Nutrition",I.meal],
+    ["progress","Progress",I.chart],["messages","Messages",I.chat],["billing","Billing",I.card]],
+  coach:[["clients","Clients",I.users],["schedule","Schedule",I.cal],["messages","Messages",I.chat],["library","Library",I.layers]],
+  admin:[["overview","Overview",I.grid],["bookings","Bookings",I.cal],["clients","Accounts",I.users],["coaches","Clients",I.users],
+    ["stacks","Stacks & Programs",I.layers],["products","Products",I.box],["analytics","Analytics",I.chart]]
+};
+const ROLE_USER={client:{n:"Alex Rivera",e:"Client",in:"AR"},coach:{n:"Coach J. San Diego",e:"Head Coach",in:"JS"},admin:{n:"Gregory S.",e:"Admin",in:"GS"}};
+
+/* ============ STATE ============ */
+let state={role:"client",page:"today",client:null,loggedIn:false,
+  currentStack:["Workout Program — PPL 6-day","Nutrition Plan — 2,100 kcal cut","Cardio Program — 8k steps","Habit Program — Sleep & hydration","Check-in Schedule — Weekly","Education Videos — Fat loss basics"],
+  clientStack:["Workout Program — Hybrid Push/Pull/Legs","Nutrition Plan — 2,100 kcal cut","Habit Program — Steps & sleep","Check-in Schedule — Weekly"]};
+DATA.client.workout.exercises.forEach(e=>e.done=false);
+function toast(msg){let t=document.createElement('div');t.textContent=msg;t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0a0d14;color:#fff;padding:12px 20px;border-radius:12px;font-size:.85rem;font-weight:600;z-index:200;box-shadow:0 12px 30px rgba(0,0,0,.3);opacity:0;transition:.3s';document.body.appendChild(t);requestAnimationFrame(()=>t.style.opacity='1');setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},1600);}
+
+/* ============ AUTH (Supabase) ============ */
+/* ↓↓↓ PASTE YOUR TWO SUPABASE VALUES BETWEEN THE QUOTES ↓↓↓ */
+const SUPABASE_URL = "https://xcobjwpmrqvtfagdphao.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_ZxgTmxueol1DuvUaZTYsKQ_j7xrFR5n";
+/* ↑↑↑ once both are filled in, Google sign-in is live ↑↑↑ */
+const sb = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const ADMIN_EMAILS = ["stevenson@pacificridgewayinsurance.com", "coachjsd@yahoo.com", "gregorystevensonba@gmail.com", "coachjsandiego@gmail.com"];
+let AUTH_USER = null, IS_ADMIN = false, MEMBERS = null, BOOKINGS = null;
+async function signInGoogle(){
+  if(!sb){ state.loggedIn=true; render(); return; }   // demo fallback until keys are added
+  const { error } = await sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: location.origin + location.pathname } });
+  if(error){ toast("Sign-in error: "+error.message); }
+}
+async function doSignOut(){ if(sb){ try{ await sb.auth.signOut(); }catch(e){} } AUTH_USER=null; state.loggedIn=false; render(); }
+function applyUser(u){
+  if(!u){ AUTH_USER=null; IS_ADMIN=false; return; }
+  const m=u.user_metadata||{}; const name=m.full_name||m.name||u.email||"Member";
+  AUTH_USER={ name, email:u.email||"", avatar:m.avatar_url||m.picture||"",
+    initials:(name.split(" ").map(x=>x[0]).slice(0,2).join("")||"U").toUpperCase() };
+  IS_ADMIN = ADMIN_EMAILS.includes((u.email||"").toLowerCase());
+}
+async function onSignedIn(session){
+  state.loggedIn=true; state.client=null; applyUser(session.user);
+  state.role = IS_ADMIN ? "admin" : "client";
+  state.page = IS_ADMIN ? "overview" : "today";
+  try{ await sb.from("profiles").upsert({ id:session.user.id, email:session.user.email, full_name:AUTH_USER.name, last_seen:new Date().toISOString() }); }catch(e){}
+  if(IS_ADMIN){
+    try{ const { data } = await sb.from("profiles").select("*").order("created_at",{ascending:false}); MEMBERS = data||[]; }catch(e){}
+    try{ const { data } = await sb.from("bookings").select("*").order("created_at",{ascending:false}); BOOKINGS = data||[]; }catch(e){}
+  }
+  render();
+}
+
+/* ============ HELPERS ============ */
+const $=(s,el=document)=>el.querySelector(s);
+function ring(pct,size=64,stroke=7,color="var(--blue)"){
+  const r=(size-stroke)/2,c=2*Math.PI*r,off=c*(1-pct/100);
+  return `<svg width="${size}" height="${size}" class="ring"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--mist)" stroke-width="${stroke}"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}"/></svg>`;
+}
+function line(vals,w=460,h=120,color="#8b2fd6"){
+  const min=Math.min(...vals),max=Math.max(...vals),pad=10;
+  const pts=vals.map((v,i)=>{const x=pad+i*(w-2*pad)/(vals.length-1);const y=h-pad-((v-min)/(max-min||1))*(h-2*pad);return [x,y];});
+  const d=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  const area=d+` L${pts[pts.length-1][0].toFixed(1)} ${h} L${pts[0][0].toFixed(1)} ${h} Z`;
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" preserveAspectRatio="none" style="height:${h}px"><defs><linearGradient id="lg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".18"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs><path d="${area}" fill="url(#lg)"/><path d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="${color}"/>`).join("")}</svg>`;
+}
+function bars(vals,w=460,h=120,color="#8b2fd6"){
+  const max=Math.max(...vals),bw=(w)/(vals.length)-8;
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" style="height:${h}px">${vals.map((v,i)=>{const bh=(v/max)*(h-14);const x=i*(w/vals.length)+4;return `<rect x="${x}" y="${h-bh}" width="${bw}" height="${bh}" rx="5" fill="${i===vals.length-1?color:'#d8c5f0'}"/>`;}).join("")}</svg>`;
+}
+const statusPill={"on-track":'<span class="pill green">● On track</span>',"needs-nudge":'<span class="pill amber">● Needs nudge</span>',"at-risk":'<span class="pill red">● At risk</span>'};
+
+/* ============ LOGIN ============ */
+function loginScreen(){
+  document.body.classList.add('auth');
+  $("#app").innerHTML=`
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <div class="brand" style="justify-content:center;padding:0 0 8px"><span class="m">J</span> Coach J. <span>San Diego</span></div>
+        <h2 style="text-align:center;font-size:1.5rem;margin:6px 0 4px">Welcome back</h2>
+        <p class="sub" style="text-align:center;margin-bottom:22px">Sign in to your coaching dashboard</p>
+        <button class="auth-btn" data-login="google"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.2-4.8 3.2-7.9z"/><path fill="#34A853" d="M12 23c2.9 0 5.4-1 7.2-2.7l-3.6-2.7c-1 .7-2.3 1.1-3.6 1.1-2.8 0-5.1-1.9-6-4.4H2.3v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M6 14.3a6.6 6.6 0 0 1 0-4.2V7.3H2.3a11 11 0 0 0 0 9.8z"/><path fill="#EA4335" d="M12 5.5c1.6 0 3 .5 4.1 1.6l3.1-3.1A11 11 0 0 0 2.3 7.3l3.7 2.8c.9-2.5 3.2-4.6 6-4.6z"/></svg> Continue with Google</button>
+        <button class="auth-btn" data-login="apple"><svg viewBox="0 0 24 24" width="17" height="17" fill="#000"><path d="M16.4 12.8c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 3 2.3 1.2-.05 1.6-.8 3-.8s1.8.8 3 .75c1.2-.02 2-1.1 2.8-2.2.9-1.3 1.2-2.5 1.3-2.6-.03-.01-2.4-.9-2.4-3.6zM14.2 5.7c.6-.8 1.1-1.9 1-3-.9.04-2 .6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .08 2-.5 2.7-1.3z"/></svg> Continue with Apple</button>
+        <div class="auth-or"><span>or</span></div>
+        <input class="auth-input" type="email" placeholder="you@email.com" value="alex@email.com" />
+        <input class="auth-input" type="password" placeholder="Password" value="········" />
+        <button class="btn" style="width:100%;justify-content:center" data-login="email">Sign in</button>
+        <div class="row" style="justify-content:space-between;margin-top:14px">
+          <button class="auth-link" data-login="magic">Email me a magic link</button>
+          <button class="auth-link">Forgot password?</button>
+        </div>
+      </div>
+      <p class="sub" style="text-align:center;margin-top:18px">New here? <a href="programs.html" style="color:var(--blue);font-weight:600">Explore coaching →</a></p>
+    </div>`;
+  document.querySelectorAll("[data-login]").forEach(b=>b.onclick=()=>{
+    const k=b.dataset.login;
+    if(k==="magic"){toast("Magic link sent ✉️");return;}
+    if(k==="google"){ signInGoogle(); return; }
+    state.loggedIn=true; render();   // apple / email: demo sign-in for now
+  });
+}
+
+/* ============ RENDER SHELL ============ */
+function render(){
+  if(!state.loggedIn){loginScreen();return;}
+  document.body.classList.remove('auth');
+  const nav=NAV[state.role], base=ROLE_USER[state.role];
+  const u = AUTH_USER ? {n:AUTH_USER.name, e:base.e, in:AUTH_USER.initials, avatar:AUTH_USER.avatar} : base;
+  const pages=state.role==="client"?CLIENT:state.role==="coach"?COACH:ADMIN;
+  const title=(nav.find(n=>n[0]===state.page)||nav[0])[1];
+  $("#app").innerHTML=`
+    <aside class="side">
+      <div class="brand"><span class="m">J</span> Coach J. <span>San Diego</span></div>
+      <div class="role-chip">${state.role} workspace</div>
+      <nav class="nav">${nav.map(n=>`<a data-page="${n[0]}" class="${n[0]===state.page?'active':''}">${n[2]}<span>${n[1]}</span></a>`).join("")}</nav>
+      <div class="side-foot">
+        ${(!sb || IS_ADMIN) ? `<div class="switcher">
+          ${["client","coach","admin"].map(r=>`<button data-role="${r}" class="${r===state.role?'on':''}">${r[0].toUpperCase()+r.slice(1)}</button>`).join("")}
+        </div>` : ``}
+        <div class="user"><div class="avatar">${u.avatar?`<img src="${u.avatar}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:u.in}</div><div><div class="n">${u.n}</div><div class="e">${u.e}</div></div><span class="signout" data-signout="1">Sign out</span></div>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <button class="icon-btn mobile-only" onclick="document.body.classList.add('menu')" style="display:none">${I.menu}</button>
+        <h1>${state.client?state.client.n:title}</h1>
+        <div class="search">${I.search}<span>Search clients, workouts…</span></div>
+        <button class="icon-btn">${I.bell}</button>
+      </div>
+      <div class="content"><div class="wrapx">${(pages[state.page]||(()=>'<div class="card pad">Coming soon</div>'))()}</div></div>
+    </main>`;
+  // wire nav
+  document.querySelectorAll("[data-page]").forEach(a=>a.onclick=()=>{state.page=a.dataset.page;state.client=null;document.body.classList.remove('menu');render();});
+  document.querySelectorAll("[data-role]").forEach(b=>b.onclick=()=>{state.role=b.dataset.role;state.page=NAV[b.dataset.role][0][0];state.client=null;render();});
+  // show mobile menu btn
+  const mb=document.querySelector('.icon-btn.mobile-only'); if(window.innerWidth<=900&&mb) mb.style.display='grid';
+}
+
+/* ============ CLIENT PAGES ============ */
+const c=DATA.client;
+const CLIENT={
+  today:()=>{
+    const consumed=c.meals.filter(m=>m.done).reduce((a,m)=>a+m.k,0);
+    const habitsDone=c.habits.filter(h=>h.done).length;
+    const exDone=c.workout.exercises.filter(e=>e.done).length, exTot=c.workout.exercises.length;
+    return `
+    <div class="grid g2" style="grid-template-columns:1.6fr 1fr">
+      <div class="card hero-day pad">
+        <div class="eyebrow">Today · ${new Date().toLocaleDateString('en-US',{weekday:'long'})}</div>
+        <h2 style="color:#fff;font-size:1.7rem;margin:10px 0 4px">Good morning, Alex 👋</h2>
+        <p style="color:#cdd6ea;font-size:.92rem">You're on a <b style="color:#fff">${c.streak}-day streak</b>. Check items off below and watch your rings fill.</p>
+        <div class="row" style="gap:26px;margin-top:20px;flex-wrap:wrap">
+          <div class="row" style="gap:10px">${ring(Math.min(100,Math.round(consumed/c.macros.calGoal*100)),58,7)}<div><div style="font-weight:700">${consumed}</div><div style="font-size:.75rem;color:#c9a8ee">/ ${c.macros.calGoal} kcal</div></div></div>
+          <div class="row" style="gap:10px">${ring(Math.min(100,Math.round(c.water.cur/c.water.goal*100)),58,7,'#16b8a6')}<div><div style="font-weight:700">${c.water.cur.toFixed(1)}L</div><div style="font-size:.75rem;color:#c9a8ee">/ ${c.water.goal}L water</div><button class="btn ghost sm" data-water="1" style="margin-top:6px;padding:4px 10px;color:#fff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)">+250 ml</button></div></div>
+          <div class="row" style="gap:10px">${ring(Math.round(habitsDone/c.habits.length*100),58,7,'#ff9f43')}<div><div style="font-weight:700">${habitsDone} / ${c.habits.length}</div><div style="font-size:.75rem;color:#c9a8ee">habits</div></div></div>
+        </div>
+      </div>
+      <div class="card pad">
+        <div class="eyebrow">Next check-in</div>
+        <div style="font-weight:700;font-size:1.05rem;margin:8px 0 2px">${c.appt.when}</div>
+        <div class="sub">${c.appt.type}</div>
+        <div class="divide"></div>
+        <div class="eyebrow">Message from ${c.coach}</div>
+        <p style="font-size:.88rem;color:var(--slate);margin-top:8px">${c.coachMsg}</p>
+        <button class="btn ghost sm" style="margin-top:12px" data-page="messages">Reply →</button>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:18px;grid-template-columns:1.6fr 1fr">
+      <div class="card pad">
+        <div class="between"><div><div class="eyebrow">Today's workout · ${exDone}/${exTot} done</div><h3 style="margin-top:6px">${c.workout.name}</h3></div><span class="pill blue">${c.workout.dur}</span></div>
+        <div style="margin-top:14px">${c.workout.exercises.map((e,i)=>`<div class="task"><div class="check ${e.done?'done':''}" data-ex="${i}" style="cursor:pointer">${e.done?I.check:''}</div><div style="flex:1"><div style="font-weight:600;font-size:.9rem">${e.n}</div><div class="sub">${e.s} · rest ${e.r}</div></div></div>`).join("")}</div>
+        <button class="btn" style="margin-top:16px;width:100%" data-complete-workout="1">${exDone===exTot?'✓ Workout complete':'Mark all complete'}</button>
+      </div>
+      <div>
+        <div class="card pad"><div class="eyebrow">Habits</div>
+          ${c.habits.map((h,i)=>`<div class="task"><div class="check ${h.done?'done':''}" data-habit="${i}" style="cursor:pointer">${h.done?I.check:''}</div><div style="font-weight:600;font-size:.9rem">${h.n}</div></div>`).join("")}
+        </div>
+        <div class="card pad" style="margin-top:18px"><div class="between"><div class="eyebrow">Meals · ${consumed}/${c.macros.calGoal} kcal</div></div>
+          <div class="row" style="gap:14px;margin:12px 0 6px"><span class="tag">P ${c.macros.p}g</span><span class="tag">C ${c.macros.c}g</span><span class="tag">F ${c.macros.f}g</span></div>
+          ${c.meals.map((m,i)=>`<div class="task"><div class="check ${m.done?'done':''}" data-meal="${i}" style="cursor:pointer">${m.done?I.check:''}</div><div style="flex:1;font-weight:600;font-size:.9rem">${m.n}</div><div class="sub">${m.k} kcal</div></div>`).join("")}
+        </div>
+      </div>
+    </div>`;},
+  workouts:()=>`
+    <div class="card pad">
+      <div class="between"><h3>This week's program</h3><span class="pill blue">Hybrid · Week 6</span></div>
+      <div class="divide"></div>
+      ${["Mon · Upper Push ✓","Tue · Lower ✓","Wed · Rest","Thu · Upper Pull","Fri · Lower","Sat · Conditioning","Sun · Rest"].map((d,i)=>`<div class="list-item"><div class="check ${i<2?'done':''}">${i<2?I.check:''}</div><div style="flex:1;font-weight:600;font-size:.92rem">${d.split(' · ')[1]}</div><div class="sub">${d.split(' · ')[0]}</div></div>`).join("")}
+    </div>
+    <div class="card pad" style="margin-top:18px"><div class="eyebrow">Personal records</div>
+      <div class="grid g3" style="margin-top:12px">
+        ${[["Bench","185 lb","+15"],["Squat","265 lb","+30"],["Deadlift","315 lb","+40"]].map(p=>`<div class="card pad kpi"><div class="sub">${p[0]}</div><div class="big" style="margin-top:6px">${p[1]}</div><span class="pill green" style="margin-top:8px">▲ ${p[2]} lb</span></div>`).join("")}
+      </div>
+    </div>`,
+  nutrition:()=>`
+    <div class="card pad"><div class="between"><h3>Your nutrition plan</h3><span class="pill blue">${c.macros.calGoal} kcal target</span></div>
+      <div class="grid g3" style="margin-top:16px">
+        ${[["Protein",c.macros.p+"g","165g"],["Carbs",c.macros.c+"g","210g"],["Fat",c.macros.f+"g","60g"]].map(m=>`<div class="card pad"><div class="sub">${m[0]}</div><div class="big" style="margin:6px 0 10px;font-size:1.5rem">${m[1]}</div><div class="progress"><i style="width:${60+Math.random()*30}%"></i></div><div class="sub" style="margin-top:6px">of ${m[2]}</div></div>`).join("")}
+      </div>
+    </div>
+    <div class="card pad" style="margin-top:18px"><div class="eyebrow">Today's meals</div>
+      ${c.meals.map(m=>`<div class="list-item"><div class="check ${m.done?'done':''}">${m.done?I.check:''}</div><div style="flex:1;font-weight:600;font-size:.9rem">${m.n}</div><div class="sub">${m.k} kcal</div><button class="btn ghost sm">Swap</button></div>`).join("")}
+      <button class="btn ghost" style="margin-top:14px">Generate grocery list</button>
+    </div>`,
+  progress:()=>`
+    <div class="card pad"><div class="between"><div><div class="eyebrow">Body weight</div><h3 style="margin-top:6px">${c.curW} lb <span class="pill green" style="vertical-align:middle">▼ ${c.startW-c.curW} lb</span></h3></div><div class="seg"><button class="on">3M</button><button>6M</button><button>1Y</button></div></div>
+      <div style="margin-top:14px">${line(c.weight)}</div>
+      <div class="sub">Start ${c.startW} lb · Goal ${c.goalW} lb · ${Math.round((c.startW-c.curW)/(c.startW-c.goalW)*100)}% there</div>
+    </div>
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card pad"><div class="eyebrow">Weekly adherence</div><div style="margin-top:12px">${bars([82,88,79,91,86,94,92])}</div><div class="sub">Avg 87% · trending up</div></div>
+      <div class="card pad"><div class="eyebrow">Progress photos</div>
+        <div class="grid g2" style="margin-top:12px;gap:10px">
+          <div><div style="aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:#eef"><img src="assets/img/tx-man-before.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 15%"></div><div class="sub" style="text-align:center;margin-top:6px">Week 1</div></div>
+          <div><div style="aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:#eef"><img src="assets/img/tx-man-after.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 15%"></div><div class="sub" style="text-align:center;margin-top:6px">Week 24</div></div>
+        </div>
+      </div>
+    </div>`,
+  messages:()=>msgView("Coach J. San Diego"),
+  billing:()=>`
+    <div class="card pad"><div class="between"><div><div class="eyebrow">Current plan</div><h3 style="margin-top:6px">Hybrid Coaching</h3><div class="sub">Renews Aug 17 · $349/mo</div></div><span class="pill green">● Active</span></div>
+      <div class="divide"></div><div class="row" style="gap:10px">${I.card}<span style="font-size:.9rem">Visa ending 4242</span><button class="btn ghost sm" style="margin-left:auto">Update</button></div>
+    </div>
+    <div class="card pad" style="margin-top:18px"><div class="eyebrow">Invoices</div>
+      ${[["Jul 17, 2026","$349.00","Paid"],["Jun 17, 2026","$349.00","Paid"],["May 17, 2026","$349.00","Paid"]].map(iv=>`<div class="list-item"><div style="flex:1;font-weight:600;font-size:.9rem">${iv[0]}</div><div class="sub">${iv[1]}</div><span class="pill green">${iv[2]}</span><button class="btn ghost sm">PDF</button></div>`).join("")}
+    </div>`
+};
+function msgView(who){return `
+  <div class="card pad" style="display:flex;flex-direction:column;height:66vh">
+    <div class="row" style="padding-bottom:12px;border-bottom:1px solid var(--line)"><div class="avatar">${who.split(' ').map(x=>x[0]).join('')}</div><div><div style="font-weight:700">${who}</div><div class="sub">● Online</div></div></div>
+    <div style="flex:1;overflow:auto;padding:16px 4px">
+      <div class="msg"><div class="avatar" style="width:28px;height:28px;font-size:.7rem">JS</div><div class="bubble">Morning! How did yesterday's session feel?</div></div>
+      <div class="msg me"><div class="bubble">Felt strong — hit a new bench PR at 185!</div></div>
+      <div class="msg"><div class="avatar" style="width:28px;height:28px;font-size:.7rem">JS</div><div class="bubble">${c.coachMsg}</div></div>
+    </div>
+    <div class="row" style="border-top:1px solid var(--line);padding-top:12px"><div class="search" style="flex:1;margin:0"><span>Type a message…</span></div><button class="btn">Send</button></div>
+  </div>`;}
+
+/* ============ COACH PAGES ============ */
+const COACH={
+  clients:()=>state.client?clientDetail():`
+    <div class="grid g4" style="margin-bottom:18px">
+      ${[["Active clients","128"],["Avg adherence","84%"],["Check-ins due","6"],["At risk","3"]].map(k=>`<div class="card pad kpi"><div class="sub">${k[0]}</div><div class="big" style="margin-top:6px">${k[1]}</div></div>`).join("")}
+    </div>
+    <div class="card"><table><thead><tr><th>Client</th><th>Goal</th><th>Tier</th><th>Adherence</th><th>Last check-in</th><th>Status</th></tr></thead><tbody>
+      ${DATA.clients.map(cl=>`<tr class="trow" data-client="${cl.n}"><td><div class="row"><div class="avatar" style="width:30px;height:30px;font-size:.72rem">${cl.in}</div><b>${cl.n}</b></div></td><td>${cl.goal}</td><td><span class="tag">${cl.tier}</span></td><td><div style="width:120px"><div class="progress"><i class="${cl.adh>80?'g':cl.adh>60?'':'a'}" style="width:${cl.adh}%"></i></div><div class="sub" style="margin-top:4px">${cl.adh}%</div></div></td><td class="muted">${cl.checkin}</td><td>${statusPill[cl.status]}</td></tr>`).join("")}
+    </tbody></table></div>`,
+  schedule:()=>`
+    <div class="card pad"><h3>This week</h3><div class="divide"></div>
+    ${[["Mon 9:00 AM","Dana Kim","Progress check"],["Tue 2:30 PM","James Park","Onboarding call"],["Thu 2:30 PM","Alex Rivera","Weekly check-in"],["Fri 11:00 AM","Tom Ellis","Re-engagement call"]].map(a=>`<div class="list-item"><div style="width:130px;font-weight:600;font-size:.85rem">${a[0]}</div><div style="flex:1"><b>${a[1]}</b><div class="sub">${a[2]}</div></div><button class="btn ghost sm">Join</button></div>`).join("")}
+    </div>`,
+  messages:()=>msgView("Alex Rivera"),
+  library:()=>libraryView()
+};
+function clientDetail(){const cl=DATA.clients.find(x=>x.n===state.client.n)||DATA.clients[0];return `
+  <button class="btn ghost sm" data-back="1" style="margin-bottom:16px">← All clients</button>
+  <div class="grid g2" style="grid-template-columns:1fr 1.4fr">
+    <div class="card pad">
+      <div class="row"><div class="avatar" style="width:54px;height:54px;font-size:1.1rem">${cl.in}</div><div><h3>${cl.n}</h3><div class="sub">${cl.goal} · ${cl.tier}</div></div></div>
+      <div class="divide"></div>
+      <div class="between"><span class="sub">Adherence</span><b>${cl.adh}%</b></div><div class="progress" style="margin-top:6px"><i class="${cl.adh>80?'g':''}" style="width:${cl.adh}%"></i></div>
+      <div class="grid g2" style="margin-top:16px;gap:10px">
+        <div class="card pad" style="padding:14px"><div class="sub">Weight</div><b>196 lb ▼18</b></div>
+        <div class="card pad" style="padding:14px"><div class="sub">Streak</div><b>24 days</b></div>
+      </div>
+      <button class="btn" style="width:100%;margin-top:16px">Message ${cl.n.split(' ')[0]}</button>
+    </div>
+    <div class="card pad">
+      <div class="between"><h3>Assigned stack</h3><button class="btn ghost sm">Edit stack</button></div>
+      <div style="margin-top:14px">
+        ${state.clientStack.map((s,i)=>`<div class="stack-mod">${I.layers}<span>${s}</span><span class="h" data-rmclient="${i}" style="cursor:pointer;color:var(--red)">✕</span></div>`).join("")}
+        <div class="chip-add" data-addclient="1">+ Add module to stack</div>
+      </div>
+      <div class="divide"></div>
+      <div class="eyebrow">Latest check-in · 2h ago</div>
+      <p style="font-size:.88rem;color:var(--slate);margin-top:8px">"Energy's up, sleeping better. Weekend was tough with travel but stayed on track for the most part."</p>
+      <div class="row" style="gap:10px;margin-top:10px"><span class="tag">Weight 196</span><span class="tag">Sleep 7.2h</span><span class="tag">Mood 8/10</span></div>
+    </div>
+  </div>`;}
+function libraryView(){return `
+  <div class="seg" style="margin-bottom:16px"><button class="on">Workouts</button><button>Nutrition</button><button>Habits</button></div>
+  <div class="grid g3">
+    ${["Upper Push A","Lower Strength","Full-Body Conditioning","Dumbbell Hypertrophy","Mobility Flow","Home Athlete"].map(w=>`<div class="card pad"><div class="row" style="gap:10px">${I.dumbbell}<b style="font-size:.95rem">${w}</b></div><div class="sub" style="margin-top:8px">5 exercises · 45 min</div><div class="row" style="gap:6px;margin-top:12px"><span class="tag">Intermediate</span><span class="tag">Gym</span></div></div>`).join("")}
+  </div>`;}
+
+/* ============ ADMIN PAGES ============ */
+const ADMIN={
+  overview:()=>{
+    const accts=MEMBERS?MEMBERS.length:0, consults=BOOKINGS?BOOKINGS.length:0, clients=DATA.clients.length;
+    const wk=MEMBERS?MEMBERS.filter(m=>m.created_at&&(Date.now()-new Date(m.created_at))<6048e5).length:0;
+    const live='<span class="pill green" style="margin-left:6px;font-size:.58rem;padding:2px 7px">● LIVE</span>';
+    return `
+    <div class="grid g4">
+      <div class="card pad kpi"><div class="sub">Accounts${live}</div><div class="big" style="margin:6px 0 8px">${accts}</div><span class="pill green">real data</span></div>
+      <div class="card pad kpi"><div class="sub">Coaching clients${live}</div><div class="big" style="margin:6px 0 8px">${clients}</div><span class="pill green">real data</span></div>
+      <div class="card pad kpi"><div class="sub">Consult requests${live}</div><div class="big" style="margin:6px 0 8px">${consults}</div><span class="pill green">real data</span></div>
+      <div class="card pad kpi"><div class="sub">New this week</div><div class="big" style="margin:6px 0 8px">${wk}</div><span class="pill">from sign-ins</span></div>
+    </div>
+    <div class="grid g2" style="margin-top:18px;grid-template-columns:1.6fr 1fr">
+      <div class="card pad"><div class="between"><div class="eyebrow">Revenue (MRR)</div><span class="pill amber">Sample · connect Stripe</span></div><div style="margin-top:14px">${line([128,139,146,152,161,173,182],460,150,'#8b2fd6')}</div><p class="sub" style="margin-top:8px">Real revenue appears here once you connect Stripe payments.</p></div>
+      <div class="card pad"><div class="between"><div class="eyebrow">Recent sign-ups</div>${(MEMBERS&&MEMBERS.length)?'<span class="pill green">● Live</span>':''}</div>
+        ${(MEMBERS&&MEMBERS.length)?MEMBERS.slice(0,6).map(m=>{const nm=m.full_name||m.email||"Member";const ini=nm.split(" ").map(x=>x[0]).slice(0,2).join("").toUpperCase();return '<div class="list-item" style="padding:10px 0"><div class="avatar" style="width:30px;height:30px;font-size:.7rem">'+ini+'</div><div style="flex:1"><b style="font-size:.9rem">'+nm+'</b><div class="sub">'+(m.email||"")+'</div></div><div class="sub">'+(m.created_at?new Date(m.created_at).toLocaleDateString():"")+'</div></div>';}).join(""):'<p class="sub" style="margin-top:12px">No sign-ups yet — they appear here live as people log in.</p>'}
+      </div>
+    </div>
+    <div class="card pad" style="margin-top:18px"><div class="between"><div class="eyebrow">Coaches</div><button class="btn ghost sm">Manage</button></div>
+      <table style="margin-top:8px"><thead><tr><th>Coach</th><th>Clients</th><th>Retention</th><th>Role</th></tr></thead><tbody>
+      ${DATA.coaches.map(co=>`<tr><td><div class="row"><div class="avatar" style="width:28px;height:28px;font-size:.7rem">${co.in}</div><b>${co.n}</b></div></td><td>${co.clients}</td><td>${co.retention}%</td><td><span class="tag">${co.role}</span></td></tr>`).join("")}
+      </tbody></table>
+    </div>`;},
+  bookings:()=>{
+    if(BOOKINGS && BOOKINGS.length){
+      return `<div class="between" style="margin-bottom:16px"><div><h3>Consultation requests (${BOOKINGS.length})</h3><div class="sub">Live leads from your website — newest first</div></div><span class="pill green">● Live</span></div>
+      <div class="card"><table><thead><tr><th>Name</th><th>Contact</th><th>Goal</th><th>Interested in</th><th>When</th></tr></thead><tbody>
+      ${BOOKINGS.map(b=>`<tr class="trow"><td><b>${b.name||"—"}</b>${b.message?`<div class="sub">${b.message}</div>`:""}</td><td class="muted">${b.email||""}${b.phone?"<br>"+b.phone:""}</td><td>${b.goal?`<span class="tag">${b.goal}</span>`:"—"}</td><td class="muted">${b.tier||"—"}</td><td class="muted">${b.created_at?new Date(b.created_at).toLocaleString():"—"}</td></tr>`).join("")}
+      </tbody></table></div>`;
+    }
+    return `<div class="card pad"><div class="eyebrow">Bookings</div><h3 style="margin-top:8px">No consultation requests yet</h3><p class="sub" style="margin-top:6px">When someone fills out "Book Free Consultation" on your site, their request lands here instantly — with their name, contact, and goals.</p></div>`;
+  },
+  clients:()=>{
+    if(MEMBERS && MEMBERS.length){
+      return `<div class="between" style="margin-bottom:16px"><div><h3>Accounts (${MEMBERS.length})</h3><div class="sub">Everyone who has signed in — live from your Supabase database</div></div><span class="pill green">● Live</span></div>
+      <div class="card"><table><thead><tr><th>Account</th><th>Email</th><th>Role</th><th>Last seen</th></tr></thead><tbody>
+      ${MEMBERS.map(m=>{const nm=m.full_name||m.email||"Member";const ini=nm.split(" ").map(x=>x[0]).slice(0,2).join("").toUpperCase();const adm=ADMIN_EMAILS.includes((m.email||"").toLowerCase());return `<tr class="trow"><td><div class="row"><div class="avatar" style="width:30px;height:30px;font-size:.72rem">${ini}</div><b>${nm}</b></div></td><td class="muted">${m.email||"—"}</td><td>${adm?'<span class="pill blue">Admin</span>':'<span class="tag">Client</span>'}</td><td class="muted">${m.last_seen?new Date(m.last_seen).toLocaleString():"—"}</td></tr>`;}).join("")}
+      </tbody></table></div>
+      <p class="sub" style="margin-top:12px">As more people sign in with Google, they appear here automatically.</p>`;
+    }
+    return `<div class="card pad"><div class="eyebrow">Accounts</div><h3 style="margin-top:8px">No accounts yet</h3><p class="sub" style="margin-top:6px">Every person who signs in with Google shows up here automatically. Sign in from a second Google account to watch it populate.</p></div>`;
+  },
+  coaches:()=> state.client ? adminClientDetail() : `
+    <div class="between" style="margin-bottom:16px"><h3>Clients (${DATA.clients.length})</h3><button class="btn" data-addclient-adm="1">+ Add client</button></div>
+    <div class="card"><table><thead><tr><th>Client</th><th>Goal</th><th>Tier</th><th>Adherence</th><th>Status</th><th></th></tr></thead><tbody>
+    ${DATA.clients.map((cl,i)=>`<tr class="trow" data-client="${cl.n}"><td><div class="row"><div class="avatar" style="width:30px;height:30px;font-size:.72rem">${cl.in}</div><b>${cl.n}</b></div></td><td>${cl.goal}</td><td><span class="tag">${cl.tier}</span></td><td><div style="width:120px"><div class="progress"><i class="${cl.adh>80?'g':cl.adh>60?'':'a'}" style="width:${cl.adh}%"></i></div><div class="sub" style="margin-top:4px">${cl.adh}%</div></div></td><td>${statusPill[cl.status]}</td><td style="text-align:right"><button class="btn ghost sm" data-delclient="${i}" title="Remove client">✕</button></td></tr>`).join("")}
+    </tbody></table></div>`,
+  stacks:()=>`
+    <div class="grid g2" style="grid-template-columns:1fr 1.3fr">
+      <div class="card pad"><div class="eyebrow">Module library</div><p class="sub" style="margin:6px 0 14px">Click a module to add it. Update one module → every client on it updates instantly.</p>
+        ${DATA.stacks.map(s=>`<div class="stack-mod" data-addmod="${s}" style="cursor:pointer">${I.layers}<span>${s}</span><span class="h" style="color:var(--blue)">+</span></div>`).join("")}
+      </div>
+      <div class="card pad"><div class="between"><div class="eyebrow">Building: “Hybrid Cut — Intermediate”</div><span class="pill blue">214 clients using</span></div>
+        <div style="margin-top:14px">
+          ${state.currentStack.map((s,i)=>`<div class="stack-mod">${I.layers}<span>${s}</span><span class="h" data-rmmod="${i}" style="cursor:pointer;color:var(--red)">✕</span></div>`).join("")}
+          <div class="chip-add">Click a module on the left to add it here</div>
+        </div>
+        <button class="btn" style="margin-top:14px;width:100%" data-savestack="1">Save & push to all clients</button>
+      </div>
+    </div>`,
+  products:()=>`
+    <div class="between" style="margin-bottom:16px"><h3>Products & subscriptions</h3><button class="btn">+ New product</button></div>
+    <div class="card"><table><thead><tr><th>Product</th><th>Type</th><th>Price</th><th>Active subs</th><th></th></tr></thead><tbody>
+    ${DATA.products.map(p=>`<tr class="trow"><td><b>${p.n}</b></td><td>${p.type}</td><td>${p.price}</td><td>${p.active||'—'}</td><td><span class="pill green">● Live</span></td></tr>`).join("")}
+    </tbody></table></div>
+    <div class="card pad" style="margin-top:18px"><div class="row" style="gap:10px">${I.card}<b>Stripe connected</b><span class="pill green" style="margin-left:auto">● Payments live</span></div></div>`,
+  analytics:()=>`
+    <div class="grid g4">${[["Conversion","6.4%"],["Avg LTV","$2,140"],["Churn","2.1%"],["Consult → client","38%"]].map(k=>`<div class="card pad kpi"><div class="sub">${k[0]}</div><div class="big" style="margin-top:6px">${k[1]}</div></div>`).join("")}</div>
+    <div class="card pad" style="margin-top:18px"><div class="eyebrow">Revenue by product</div><div style="margin-top:14px">${bars([182,180,96,40,32])}</div></div>`
+};
+
+/* wire dynamic (client rows, back) after each render via delegation */
+const WORKOUT_BLOCKS=["Rest / Deload","Full Body A","Full Body B","Upper Body","Lower Body","Push","Pull","Legs","Strength","Hypertrophy","Conditioning","Mobility Flow"];
+const PROGRAMS={
+ "Full Body A":[{n:"Back Squat",s:"4 × 6",r:"2:00"},{n:"Bench Press",s:"4 × 8",r:"90s"},{n:"Barbell Row",s:"3 × 10",r:"90s"},{n:"Romanian Deadlift",s:"3 × 10",r:"90s"},{n:"Plank",s:"3 × 45s",r:"45s"}],
+ "Full Body B":[{n:"Deadlift",s:"4 × 5",r:"2:30"},{n:"Overhead Press",s:"4 × 8",r:"90s"},{n:"Pull-ups",s:"3 × AMRAP",r:"90s"},{n:"Walking Lunge",s:"3 × 12",r:"75s"}],
+ "Upper Body":[{n:"Incline DB Press",s:"4 × 10",r:"75s"},{n:"Lat Pulldown",s:"4 × 12",r:"75s"},{n:"Lateral Raise",s:"3 × 15",r:"45s"},{n:"Face Pull",s:"3 × 15",r:"45s"},{n:"Biceps Curl",s:"3 × 12",r:"45s"}],
+ "Lower Body":[{n:"Front Squat",s:"4 × 8",r:"2:00"},{n:"Hip Thrust",s:"4 × 10",r:"90s"},{n:"Leg Press",s:"3 × 12",r:"75s"},{n:"Calf Raise",s:"4 × 15",r:"45s"}],
+ "Push":[{n:"Bench Press",s:"4 × 6",r:"2:00"},{n:"Overhead Press",s:"3 × 8",r:"90s"},{n:"Incline DB Press",s:"3 × 10",r:"75s"},{n:"Triceps Pushdown",s:"3 × 15",r:"45s"}],
+ "Pull":[{n:"Deadlift",s:"3 × 5",r:"2:30"},{n:"Pull-ups",s:"4 × 8",r:"90s"},{n:"Barbell Row",s:"3 × 10",r:"90s"},{n:"Face Pull",s:"3 × 15",r:"45s"}],
+ "Legs":[{n:"Back Squat",s:"4 × 8",r:"2:00"},{n:"Romanian Deadlift",s:"3 × 10",r:"90s"},{n:"Leg Curl",s:"3 × 12",r:"60s"},{n:"Calf Raise",s:"4 × 15",r:"45s"}]
+};
+function openWorkoutBuilder(block){
+  if(!PROGRAMS[block]) PROGRAMS[block]=[];
+  const inp="padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:.85rem;background:#fff";
+  const ov=document.createElement("div");
+  ov.style.cssText="position:fixed;inset:0;z-index:400;display:grid;place-items:center;background:rgba(10,13,20,.5);backdrop-filter:blur(6px);padding:20px";
+  ov.innerHTML='<div class="card pad" style="max-width:520px;width:100%;max-height:88vh;overflow:auto"><div class="between"><div><div class="eyebrow">Edit workout</div><h3 style="margin-top:2px">'+block+'</h3></div><button class="signout" id="wbx" style="font-size:1.3rem">✕</button></div><p class="sub" style="margin:6px 0 14px">Editing this updates it everywhere '+block+' is used.</p><div class="row" style="gap:8px;margin-bottom:6px"><div style="flex:2" class="sub">Exercise</div><div style="flex:1" class="sub">Sets × Reps</div><div style="width:64px" class="sub">Rest</div><div style="width:34px"></div></div><div id="wbrows"></div><div class="chip-add" id="wbadd" style="margin-top:6px">+ Add exercise</div><button class="btn" id="wbsave" style="width:100%;justify-content:center;margin-top:16px">Save workout</button></div>';
+  document.body.appendChild(ov);
+  const rows=ov.querySelector("#wbrows");
+  const rowHTML=(ex,i)=>'<div class="row" style="gap:8px;margin-bottom:8px"><input value="'+(ex.n||"").replace(/"/g,"&quot;")+'" data-exn="'+i+'" placeholder="Exercise" style="flex:2;'+inp+'"><input value="'+(ex.s||"")+'" data-exs="'+i+'" placeholder="4 × 8" style="flex:1;'+inp+'"><input value="'+(ex.r||"")+'" data-exr="'+i+'" placeholder="90s" style="width:64px;'+inp+'"><button class="btn ghost sm" data-exdel="'+i+'" style="width:34px;padding:7px 0">✕</button></div>';
+  const paint=()=>{rows.innerHTML=PROGRAMS[block].map(rowHTML).join("");};
+  paint();
+  const close=()=>ov.remove();
+  ov.addEventListener("input",ev=>{const t=ev.target;if(t.dataset.exn!=null)PROGRAMS[block][+t.dataset.exn].n=t.value;if(t.dataset.exs!=null)PROGRAMS[block][+t.dataset.exs].s=t.value;if(t.dataset.exr!=null)PROGRAMS[block][+t.dataset.exr].r=t.value;});
+  ov.addEventListener("click",ev=>{
+    if(ev.target===ov||ev.target.closest("#wbx")){close();return;}
+    if(ev.target.closest("#wbadd")){PROGRAMS[block].push({n:"",s:"3 × 10",r:"90s"});paint();return;}
+    const del=ev.target.closest("[data-exdel]");if(del){PROGRAMS[block].splice(+del.dataset.exdel,1);paint();return;}
+    if(ev.target.closest("#wbsave")){close();toast("Workout saved ✓");render();return;}
+  });
+}
+function openAddClient(){
+  const G=["Fat loss","Muscle building","Recomp","Toning","Athletic performance","General fitness","Lifestyle"];
+  const T=["Remote Coaching","In-Person 1×/week","In-Person 3×/week"];
+  const S=[["on-track","On track"],["needs-nudge","Needs nudge"],["at-risk","At risk"]];
+  const st="width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:.95rem;background:#fff;margin-top:6px";
+  const ov=document.createElement("div");
+  ov.style.cssText="position:fixed;inset:0;z-index:400;display:grid;place-items:center;background:rgba(10,13,20,.5);backdrop-filter:blur(6px);padding:20px";
+  ov.innerHTML='<div class="card pad" style="max-width:420px;width:100%"><div class="between"><h3>Add client</h3><button class="signout" id="acx" style="font-size:1.3rem">✕</button></div>'
+   +'<label class="sub" style="display:block;margin-top:14px">Name</label><input id="acn" placeholder="Client name" style="'+st+'">'
+   +'<label class="sub" style="display:block;margin-top:14px">Goal</label><select id="acg" style="'+st+'">'+G.map(g=>'<option>'+g+'</option>').join('')+'</select>'
+   +'<label class="sub" style="display:block;margin-top:14px">Coaching tier</label><select id="act" style="'+st+'">'+T.map(t=>'<option>'+t+'</option>').join('')+'</select>'
+   +'<label class="sub" style="display:block;margin-top:14px">Status</label><select id="acs" style="'+st+'">'+S.map(s=>'<option value="'+s[0]+'">'+s[1]+'</option>').join('')+'</select>'
+   +'<button class="btn" id="aca" style="width:100%;justify-content:center;margin-top:20px">Add client</button></div>';
+  document.body.appendChild(ov);
+  const close=()=>ov.remove();
+  ov.addEventListener("click",ev=>{if(ev.target===ov)close();});
+  ov.querySelector("#acx").onclick=close; ov.querySelector("#acn").focus();
+  ov.querySelector("#aca").onclick=()=>{
+    const name=ov.querySelector("#acn").value.trim();
+    if(!name){ov.querySelector("#acn").style.borderColor="#ff5a5f";return;}
+    const goal=ov.querySelector("#acg").value,tier=ov.querySelector("#act").value,status=ov.querySelector("#acs").value;
+    const ini=(name.split(/\s+/).map(x=>x[0]).slice(0,2).join("")||"C").toUpperCase();
+    DATA.clients.unshift({n:name,in:ini,goal,adh:100,checkin:"just now",status,tier});
+    close();render();toast("Client added ✓");
+  };
+}
+function adminClientDetail(){
+  const cl=DATA.clients.find(x=>x.n===state.client.n)||DATA.clients[0];
+  if(!cl.plan) cl.plan=Array.from({length:13},(_,i)=>({wk:i+1,block:((i+1)%4===0)?"Rest / Deload":(i<4?"Full Body A":i<8?"Upper Body":"Push")}));
+  if(!cl.stack) cl.stack=["Workout Program — Full Body 3×/wk","Nutrition Plan — "+cl.goal,"Habit Program — Steps & sleep","Check-in — Weekly"];
+  const phase=i=>i===0?'<div class="eyebrow" style="margin:16px 0 4px;color:var(--blue-600)">Foundation · Weeks 1–4</div>':i===4?'<div class="eyebrow" style="margin:18px 0 4px;color:var(--blue-600)">Build · Weeks 5–8</div>':i===8?'<div class="eyebrow" style="margin:18px 0 4px;color:var(--blue-600)">Peak · Weeks 9–13</div>':'';
+  return '<button class="btn ghost sm" data-back="1" style="margin-bottom:16px">← All clients</button>'
+   +'<div class="grid g2" style="grid-template-columns:1fr 1.5fr;align-items:start">'
+   +'<div><div class="card pad"><div class="row"><div class="avatar" style="width:52px;height:52px;font-size:1.1rem">'+cl.in+'</div><div><h3>'+cl.n+'</h3><div class="sub">'+cl.goal+' · '+cl.tier+'</div></div></div><div class="divide"></div><div class="between"><span class="sub">Adherence</span><b>'+cl.adh+'%</b></div><div class="progress" style="margin-top:6px"><i class="'+(cl.adh>80?'g':'')+'" style="width:'+cl.adh+'%"></i></div><button class="btn" style="width:100%;margin-top:16px">Message '+cl.n.split(' ')[0]+'</button></div>'
+   +'<div class="card pad" style="margin-top:18px"><div class="eyebrow">Assigned stack</div><p class="sub" style="margin:6px 0 12px">Build their plan from your Stacks &amp; Programs.</p>'
+   +cl.stack.map((s,i)=>'<div class="stack-mod">'+I.layers+'<span>'+s+'</span><span class="h" data-delcstack="'+i+'" style="cursor:pointer;color:var(--red)">✕</span></div>').join('')
+   +'<div class="chip-add" data-addcstack="1">+ Add module</div></div></div>'
+   +'<div class="card pad"><div class="between"><div><div class="eyebrow">90-Day Program</div><h3 style="margin-top:4px">Week-by-week</h3></div><span class="pill blue">13 weeks</span></div>'
+   +cl.plan.map((w,i)=>phase(i)+'<div class="list-item" style="padding:8px 0"><div style="width:74px;font-weight:700;font-size:.9rem">Week '+w.wk+'</div><select data-weekplan="'+i+'" style="flex:1;padding:9px 11px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:.9rem;background:#fff">'+WORKOUT_BLOCKS.map(b=>'<option '+(b===w.block?'selected':'')+'>'+b+'</option>').join('')+'</select><button class="btn ghost sm" data-editwk="'+i+'" style="margin-left:8px;white-space:nowrap" title="Edit exercises">✎ Edit</button></div>').join('')
+   +'<button class="btn" style="width:100%;margin-top:16px" data-savestack="1">Save 90-day plan</button></div></div>';
+}
+document.addEventListener("change",e=>{
+  const wp=e.target.closest("[data-weekplan]");
+  if(wp&&state.client){const cl=DATA.clients.find(x=>x.n===state.client.n);if(cl&&cl.plan)cl.plan[+wp.dataset.weekplan].block=wp.value;}
+});
+document.addEventListener("click",e=>{
+  const row=e.target.closest("[data-client]");
+  if(row && !e.target.closest("button")){state.client={n:row.dataset.client};render();return;}
+  if(e.target.closest("[data-back]")){state.client=null;render();return;}
+  if(e.target.closest("[data-signout]")){doSignOut();return;}
+  // client today interactions
+  let el;
+  if((el=e.target.closest("[data-habit]"))){c.habits[+el.dataset.habit].done=!c.habits[+el.dataset.habit].done;render();return;}
+  if((el=e.target.closest("[data-meal]"))){c.meals[+el.dataset.meal].done=!c.meals[+el.dataset.meal].done;render();return;}
+  if((el=e.target.closest("[data-ex]"))){c.workout.exercises[+el.dataset.ex].done=!c.workout.exercises[+el.dataset.ex].done;render();return;}
+  if(e.target.closest("[data-water]")){c.water.cur=Math.min(c.water.goal,Math.round((c.water.cur+0.25)*100)/100);render();return;}
+  if(e.target.closest("[data-complete-workout]")){const all=c.workout.exercises.every(x=>x.done);c.workout.exercises.forEach(x=>x.done=!all);render();toast(all?'Workout reset':'Great work — workout logged 💪');return;}
+  // stack builder
+  if((el=e.target.closest("[data-addmod]"))){if(!state.currentStack.includes(el.dataset.addmod)){state.currentStack.push(el.dataset.addmod);render();toast("Module added to stack");}else{toast("Already in stack");}return;}
+  if((el=e.target.closest("[data-rmmod]"))){state.currentStack.splice(+el.dataset.rmmod,1);render();return;}
+  if(e.target.closest("[data-savestack]")){toast(state.client?"90-day plan saved ✓":"Stack saved — pushed to 214 clients ✓");return;}
+  if(e.target.closest("[data-addcstack]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl){const opts=DATA.stacks.map(s=>s+" — assigned");const pick=opts.find(o=>!cl.stack.includes(o))||("Custom module "+(cl.stack.length+1));cl.stack.push(pick);render();toast("Module added");}return;}
+  if((el=e.target.closest("[data-delcstack]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl){cl.stack.splice(+el.dataset.delcstack,1);render();}return;}
+  if((el=e.target.closest("[data-editwk]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.plan){openWorkoutBuilder(cl.plan[+el.dataset.editwk].block);}return;}
+  // admin: add / delete clients
+  if(e.target.closest("[data-addclient-adm]")){ openAddClient(); return; }
+  if((el=e.target.closest("[data-delclient]"))){
+    const i=+el.dataset.delclient; const nm=(DATA.clients[i]&&DATA.clients[i].n)||"this client";
+    if(confirm("Remove "+nm+"?")){ DATA.clients.splice(i,1); render(); toast("Client removed"); } return;
+  }
+  if((el=e.target.closest("[data-rmclient]"))){state.clientStack.splice(+el.dataset.rmclient,1);render();return;}
+  if(e.target.closest("[data-addclient]")){const opts=["Mobility Program — 10 min daily","Supplement Guide — Cut phase","Challenge — 30-day steps","Recovery Program — Deload week"];const pick=opts.find(o=>!state.clientStack.includes(o))||opts[0];state.clientStack.push(pick);render();toast("Module added");return;}
+});
+window.addEventListener("resize",()=>{const mb=document.querySelector('.icon-btn.mobile-only');if(mb)mb.style.display=window.innerWidth<=900?'grid':'none';});
+(async function init(){
+  if(sb){
+    try{ const { data } = await sb.auth.getSession();
+      if(data && data.session){ await onSignedIn(data.session); }
+    }catch(e){}
+    sb.auth.onAuthStateChange((_e, session)=>{
+      if(session){ onSignedIn(session); }
+      else { state.loggedIn=false; AUTH_USER=null; IS_ADMIN=false; MEMBERS=null; render(); }
+    });
+  }
+  render();
+})();
+</script>
+</body>
+</html>
