@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <path id="ax-top" d="M 100,100 m -75,0 a 75,75 0 0 1 150,0"/>
+    <path id="ax-bot" d="M 100,100 m -71,0 a 71,71 0 0 0 142,0"/>
+  </defs>
+  <circle cx="100" cy="100" r="99" fill="#14203f"/>
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#c9a24b" stroke-width="4"/>
+  <circle cx="100" cy="100" r="89" fill="#eef1f4"/>
+  <circle cx="100" cy="100" r="87" fill="none" stroke="#14203f" stroke-width="1.4"/>
+  <text font-family="Georgia,'Times New Roman',serif" font-size="15" font-weight="700" fill="#14203f" letter-spacing="4">
+    <textPath href="#ax-top" startOffset="50%" text-anchor="middle">JOHN AXYS</textPath>
+  </text>
+  <text font-family="Georgia,'Times New Roman',serif" font-size="13.5" font-weight="700" fill="#14203f" letter-spacing="4">
+    <textPath href="#ax-bot" startOffset="50%" text-anchor="middle">FITNESS COACHING</textPath>
+  </text>
+  <circle cx="18" cy="100" r="2.4" fill="#14203f"/>
+  <circle cx="182" cy="100" r="2.4" fill="#14203f"/>
+  <text x="100" y="116" font-family="'Snell Roundhand','Brush Script MT','Segoe Script',cursive" font-size="52" font-style="italic" letter-spacing="10" fill="#c9a24b" stroke="#14203f" stroke-width="0.6" text-anchor="middle">JA</text>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <path id="t" d="M 100,100 m -75,0 a 75,75 0 0 1 150,0"/>
+    <path id="b" d="M 100,100 m -71,0 a 71,71 0 0 0 142,0"/>
+  </defs>
+  <circle cx="100" cy="100" r="99" fill="#14203f"/>
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#c9a24b" stroke-width="4"/>
+  <circle cx="100" cy="100" r="89" fill="#eef1f4"/>
+  <circle cx="100" cy="100" r="87" fill="none" stroke="#14203f" stroke-width="1.4"/>
+  <text font-family="Georgia,serif" font-size="15" font-weight="700" fill="#14203f" letter-spacing="4"><textPath href="#t" startOffset="50%" text-anchor="middle">JOHN AXYS</textPath></text>
+  <text font-family="Georgia,serif" font-size="13.5" font-weight="700" fill="#14203f" letter-spacing="4"><textPath href="#b" startOffset="50%" text-anchor="middle">FITNESS COACHING</textPath></text>
+  <circle cx="18" cy="100" r="2.4" fill="#14203f"/><circle cx="182" cy="100" r="2.4" fill="#14203f"/>
+  <text x="104" y="121" font-family="Georgia,serif" font-size="62" font-weight="bold" fill="#c9a24b" stroke="#14203f" stroke-width="0.6" text-anchor="middle">A</text><text x="78" y="115" font-family="\x27Snell Roundhand\x27,cursive" font-size="46" font-style="italic" fill="#14203f" text-anchor="middle">J</text>
+</svg>
