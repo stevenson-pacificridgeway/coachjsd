@@ -151,10 +151,10 @@ const DATA = {
   client:{name:"Alex Rivera",email:"alex@email.com",initials:"AR",goal:"Fat loss",coach:"Coach J. San Diego",
     streak:24,weight:[214,211,209,208,205,203,201,199,197,196],startW:214,curW:196,goalW:185,
     water:{cur:2.1,goal:3},
-    workout:{name:"Upper Body — Push",dur:"45 min",done:false,exercises:[
-      {n:"Barbell Bench Press",s:"4 × 8",r:"90s"},{n:"Incline DB Press",s:"3 × 10",r:"75s"},
-      {n:"Overhead Press",s:"3 × 8",r:"90s"},{n:"Cable Fly",s:"3 × 12",r:"60s"},
-      {n:"Triceps Rope Pushdown",s:"3 × 15",r:"45s"}]},
+    workout:{name:"Chest + Triceps",dur:"50 min",done:false,exercises:[
+      {n:"Incline Barbell Bench Press",s:"3 × 12",r:"2:00"},{n:"Flat Barbell Bench Press",s:"3 × 12",r:"2:00"},
+      {n:"Pec Deck (Machine Fly)",s:"3 × 12",r:"75s"},{n:"Cable Fly",s:"3–4 × 10–15",r:"60–90s"},
+      {n:"Cable Pushdown",s:"5 × 12–15",r:"60s"},{n:"Overhead Cable Extension",s:"5 × 12–15",r:"60s"}]},
     meals:[{n:"Breakfast — Greek yogurt bowl",k:420,done:true},{n:"Lunch — Chicken & rice",k:610,done:true},
       {n:"Snack — Protein shake",k:220,done:false},{n:"Dinner — Salmon & greens",k:540,done:false}],
     macros:{cal:1790,calGoal:2100,p:165,c:180,f:55},
@@ -482,8 +482,9 @@ function clientDetail(){const cl=DATA.clients.find(x=>x.n===state.client.n)||DAT
   </div>`;}
 function libraryView(){return `
   <div class="seg" style="margin-bottom:16px"><button class="on">Workouts</button><button>Nutrition</button><button>Habits</button></div>
+  <p class="sub" style="margin:-4px 0 14px">Your muscle-group programs — tap any to view or edit its exercises, tempo, and coaching cues.</p>
   <div class="grid g3">
-    ${["Upper Push A","Lower Strength","Full-Body Conditioning","Dumbbell Hypertrophy","Mobility Flow","Home Athlete"].map(w=>`<div class="card pad"><div class="row" style="gap:10px">${I.dumbbell}<b style="font-size:.95rem">${w}</b></div><div class="sub" style="margin-top:8px">5 exercises · 45 min</div><div class="row" style="gap:6px;margin-top:12px"><span class="tag">Intermediate</span><span class="tag">Gym</span></div></div>`).join("")}
+    ${["Chest","Back","Legs","Shoulders","Biceps","Triceps","Abs"].map(w=>`<div class="card pad" data-libday="${w}" style="cursor:pointer"><div class="row" style="gap:10px">${I.dumbbell}<b style="font-size:.95rem">${w}</b></div><div class="sub" style="margin-top:8px">${(PROGRAMS[w]||[]).length} exercises · full form &amp; cues</div><div class="row" style="gap:6px;margin-top:12px"><span class="tag">Tempo + cues</span><span class="tag">Gym</span></div></div>`).join("")}
   </div>`;}
 
 /* ============ ADMIN PAGES ============ */
@@ -559,34 +560,82 @@ const ADMIN={
 };
 
 /* wire dynamic (client rows, back) after each render via delegation */
-const WORKOUT_BLOCKS=["Rest / Deload","Full Body A","Full Body B","Upper Body","Lower Body","Push","Pull","Legs","Strength","Hypertrophy","Conditioning","Mobility Flow"];
-const PROGRAMS={
- "Full Body A":[{n:"Back Squat",s:"4 × 6",r:"2:00"},{n:"Bench Press",s:"4 × 8",r:"90s"},{n:"Barbell Row",s:"3 × 10",r:"90s"},{n:"Romanian Deadlift",s:"3 × 10",r:"90s"},{n:"Plank",s:"3 × 45s",r:"45s"}],
- "Full Body B":[{n:"Deadlift",s:"4 × 5",r:"2:30"},{n:"Overhead Press",s:"4 × 8",r:"90s"},{n:"Pull-ups",s:"3 × AMRAP",r:"90s"},{n:"Walking Lunge",s:"3 × 12",r:"75s"}],
- "Upper Body":[{n:"Incline DB Press",s:"4 × 10",r:"75s"},{n:"Lat Pulldown",s:"4 × 12",r:"75s"},{n:"Lateral Raise",s:"3 × 15",r:"45s"},{n:"Face Pull",s:"3 × 15",r:"45s"},{n:"Biceps Curl",s:"3 × 12",r:"45s"}],
- "Lower Body":[{n:"Front Squat",s:"4 × 8",r:"2:00"},{n:"Hip Thrust",s:"4 × 10",r:"90s"},{n:"Leg Press",s:"3 × 12",r:"75s"},{n:"Calf Raise",s:"4 × 15",r:"45s"}],
- "Push":[{n:"Bench Press",s:"4 × 6",r:"2:00"},{n:"Overhead Press",s:"3 × 8",r:"90s"},{n:"Incline DB Press",s:"3 × 10",r:"75s"},{n:"Triceps Pushdown",s:"3 × 15",r:"45s"}],
- "Pull":[{n:"Deadlift",s:"3 × 5",r:"2:30"},{n:"Pull-ups",s:"4 × 8",r:"90s"},{n:"Barbell Row",s:"3 × 10",r:"90s"},{n:"Face Pull",s:"3 × 15",r:"45s"}],
- "Legs":[{n:"Back Squat",s:"4 × 8",r:"2:00"},{n:"Romanian Deadlift",s:"3 × 10",r:"90s"},{n:"Leg Curl",s:"3 × 12",r:"60s"},{n:"Calf Raise",s:"4 × 15",r:"45s"}]
+const WORKOUT_BLOCKS=["Rest / Deload","Chest","Back","Legs","Shoulders","Biceps","Triceps","Abs"];
+const SECOND_BLOCKS=["None","Chest","Back","Legs","Shoulders","Biceps","Triceps","Abs"];
+const GROUP_GOAL={
+ "Chest":"Upper, mid & inner chest. Feel the chest do the work — don't just move weight. Master form first, add load second.",
+ "Back":"Pull with your elbows, not your hands. Full stretch at the bottom, hard squeeze at the top. Quality over quantity.",
+ "Legs":"Full range, controlled reps, push through mid-foot. Master the movement first, increase the weight second.",
+ "Shoulders":"All three delt heads. Strict form and constant tension — precision, not ego lifting.",
+ "Biceps":"Slow eccentrics, elbows pinned. Let the biceps move the weight, not the shoulders.",
+ "Triceps":"Move only at the elbows. Constant tension — control the load over chasing weight.",
+ "Abs":"Train abs like any muscle: progressive overload, strong contractions. Momentum only moves the weight.",
+ "Rest / Deload":"Recovery day — light mobility, walking, and full recovery so the next block hits harder."
 };
-function openWorkoutBuilder(block){
-  if(!PROGRAMS[block]) PROGRAMS[block]=[];
+const PROGRAMS={
+ "Chest":[
+  {n:"Incline Barbell Bench Press",s:"3 × 12",r:"2:00",tempo:"3s down · controlled up",focus:"Upper chest, front delts, triceps",cues:["Elbows ~45°, don't flare","Shoulder blades back & down","No bouncing off the chest"],miss:["Flaring elbows straight out","Bouncing the bar","Half range of motion"]},
+  {n:"Flat Barbell Bench Press",s:"3 × 12",r:"2:00",tempo:"3s down · controlled up",focus:"Mid chest, front delts, triceps",cues:["Elbows tucked ~45°","Feet planted, chest lifted","Squeeze the chest at the top"],miss:["Flaring elbows","Rushing reps","Bouncing off the chest"]},
+  {n:"Pec Deck (Machine Fly)",s:"3 × 12",r:"75s",tempo:"3s open · 1s squeeze · 2s together",focus:"Chest isolation & stretch",cues:["Slight fixed elbow bend","Bring elbows together, not hands","Deep stretch on the open"],miss:["Turning it into a press","Slamming the weight","Shrugging the shoulders"]},
+  {n:"Cable Fly",s:"3–4 × 10–15",r:"60–90s",tempo:"2s together · 1–2s squeeze · 3s stretch",focus:"Inner & mid chest, constant tension",cues:["Hug a tree, don't press","Chest up, shoulders down & back","Fixed elbow angle throughout"],miss:["Too heavy → becomes a press","Shoulders rolling forward","Changing elbow bend mid-rep"]}
+ ],
+ "Back":[
+  {n:"High Row (Lat-Focused)",s:"3–4 × 12",r:"90s",tempo:"1s pull · 1s squeeze · 3s return",focus:"Lats, teres, rhomboids, rear delts",cues:["Pull shoulder blades down & back","Drive the elbows down & back","Full stretch at the bottom"],miss:["Shrugging to the ears","Pulling with the hands","Using momentum"]},
+  {n:"Chest-Supported Row Machine",s:"3–4 × 12",r:"90s",tempo:"1s pull · 1s squeeze · 3s lower",focus:"Mid back, rhomboids, traps, lats",cues:["Chest glued to the pad","Drive elbows back, close to body","Squeeze the shoulder blades together"],miss:["Torso swinging for momentum","Shoulders creeping up","Cutting the stretch short"]},
+  {n:"Chest-Supported DB Row",s:"3–4 × 12",r:"90s",tempo:"1s up · 1s squeeze · 3s down",focus:"Mid & lower lats, rhomboids, rear delts",cues:["Bench ~40–45°","Row to the sides of the lower chest","Full scapular stretch at the bottom"],miss:["Shrugging while rowing","Leading with the hands","Swinging the dumbbells"]}
+ ],
+ "Legs":[
+  {n:"Smith Machine Squat",s:"3 × 10–12",r:"2–3 min",tempo:"3s down · pause · 1–2s up",focus:"Quads, glutes, hamstrings",cues:["Bar on upper traps, not the neck","Control the descent — don't drop","Push through mid-foot, knees track toes"],miss:["Bar on the neck","Too heavy → short range","Knees caving inward"]},
+  {n:"Leg Press",s:"3–4 × 10–12",r:"90s",tempo:"3s down · 1s pause · 1–2s press",focus:"Quads, glutes, hamstrings (foot placement)",cues:["Full range for max activation","Lower back pressed to the pad","Don't lock the knees aggressively"],miss:["Heavy partial reps","Lower back rounding","Knees caving in"]},
+  {n:"Leg Extension",s:"3–4 × 12–15",r:"60s",tempo:"1–2s up · 1s squeeze · 3s down",focus:"Quad isolation",cues:["Hips & glutes pressed into the seat","Squeeze the quads at the top","Controlled negative, keep tension"],miss:["Swinging the legs","Hips lifting off the seat","Dropping the weight fast"]}
+ ],
+ "Shoulders":[
+  {n:"Machine Shoulder Press",s:"4 × 10–12",r:"90–120s",tempo:"1–2s press · 1s hold · 3s down",focus:"Front & side delts, triceps",cues:["Elbows slightly in front (~45°)","Push through the palms","Don't aggressively lock out"],miss:["Excessive elbow flare","Bouncing out of the bottom","Using body momentum"]},
+  {n:"Dumbbell Lateral Raises",s:"4 × 12",r:"60s",tempo:"1s up · 1s hold · 3s down",focus:"Side delts — width & the capped look",cues:["Lead with the elbows","Elbows slightly above the wrists","Push the dumbbells away, don't just lift"],miss:["Swinging with the body","Shrugging to the ears","Hands higher than elbows"]},
+  {n:"Cable Face Pull",s:"4 × 15",r:"60–90s",tempo:"1s pull · 1s squeeze · 3s return",focus:"Rear delts, upper back, posture",cues:["Pulley at nose/forehead height","Separate the rope, elbows back & out","Hands are hooks — pull with the elbows"],miss:["Pulling to the chest, not the face","Using the biceps","Leaning back for momentum"]}
+ ],
+ "Biceps":[
+  {n:"Incline Dumbbell Curl",s:"3–4 × 10–12",r:"75s",tempo:"1s up · 1s squeeze · 3–4s down",focus:"Long head — stretched position",cues:["Bench 40–45°, arms hang straight down","Supinate — pinky finishes high","Slowest part is the lowering"],miss:["Swinging the body","Elbows drifting forward","Cutting the stretch short"]},
+  {n:"EZ-Bar Preacher Curl",s:"4 × 10–12",r:"75s",tempo:"1s up · 1s squeeze · 3s down",focus:"Strict overall biceps isolation",cues:["Upper arms glued to the pad","Never bounce out of the bottom","Constant tension throughout"],miss:["Bouncing the bottom rep","Shoulders doing the work","Fast, uncontrolled negative"]},
+  {n:"Standing Hammer Curl",s:"4 × 12",r:"60s",tempo:"1s up · 1s squeeze · 3s down",focus:"Brachialis, forearms, arm thickness",cues:["Neutral grip, wrists straight","Elbows pinned to the torso","Move only the forearms"],miss:["Swinging / using the low back","Shrugging the shoulders","Elbows drifting"]}
+ ],
+ "Triceps":[
+  {n:"Cable Pushdown",s:"5 × 12–15",r:"60s",tempo:"press · 1–2s squeeze · 2–3s return",focus:"Triceps — all heads",cues:["Elbows tucked to the ribs","Move only at the elbows","Straighten without locking hard"],miss:["Swinging the body","Elbows flaring","Rolling the shoulders"]},
+  {n:"Overhead Cable Extension (Skull Crushers)",s:"5 × 12–15",r:"60s",tempo:"extend · 1–2s squeeze · slow lower",focus:"Long head — stretched position",cues:["Rope, elbows close to the head","Step into tension, staggered stance","Feel a full stretch behind the head"],miss:["Elbows flaring","Arching the low back","Rushing the reps"]},
+  {n:"Single-Arm Reverse-Grip Pushdown",s:"5 × 12–15 / arm",r:"45s",tempo:"press · 1–2s squeeze · slow return",focus:"Medial head — fixes imbalances",cues:["Underhand grip, elbow tucked","Core tight, don't twist the torso","Control over load"],miss:["Twisting the torso","Elbow drifting","Too much weight"]}
+ ],
+ "Abs":[
+  {n:"Decline Bench Leg Raises",s:"4 × 12–15",r:"60–90s",tempo:"2s up · 1s squeeze · 3s down",focus:"Lower abs, rectus abdominis, hip flexors",cues:["Slight knee bend to protect the back","Curl the pelvis up at the top","Stop before the feet touch — keep tension"],miss:["Swinging the legs up","Dropping fast on the way down","Pulling with the arms"]},
+  {n:"Abdominal Crunch Machine",s:"4 × 12–15",r:"60s",tempo:"2s down · 1s squeeze · 3s return",focus:"Rectus abdominis (six-pack)",cues:["Bring the ribs toward the pelvis","Abs pull you down, not the arms","Keep the neck relaxed"],miss:["Pulling with the arms/head","Moving too fast","Letting the stack slam"]},
+  {n:"Oblique Machine",s:"4 × 15 / side",r:"60s",tempo:"2s down · 1s squeeze · 3s up",focus:"Obliques (side abs)",cues:["Bend through the side, don't twist","Match the range both sides","Feel the side abs contract"],miss:["Rotating the whole body","Going too heavy","Using momentum"]}
+ ]
+};
+function openDay(blocks){
+  blocks=(blocks||[]).filter(b=>b&&b!=="None"&&b!=="Rest / Deload");
+  if(!blocks.length) blocks=["Chest"];
+  blocks.forEach(b=>{ if(!PROGRAMS[b]) PROGRAMS[b]=[]; });
+  const esc=s=>(s==null?"":(""+s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   const inp="padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:.85rem;background:#fff";
   const ov=document.createElement("div");
   ov.style.cssText="position:fixed;inset:0;z-index:400;display:grid;place-items:center;background:rgba(10,13,20,.5);backdrop-filter:blur(6px);padding:20px";
-  ov.innerHTML='<div class="card pad" style="max-width:520px;width:100%;max-height:88vh;overflow:auto"><div class="between"><div><div class="eyebrow">Edit workout</div><h3 style="margin-top:2px">'+block+'</h3></div><button class="signout" id="wbx" style="font-size:1.3rem">✕</button></div><p class="sub" style="margin:6px 0 14px">Editing this updates it everywhere '+block+' is used.</p><div class="row" style="gap:8px;margin-bottom:6px"><div style="flex:2" class="sub">Exercise</div><div style="flex:1" class="sub">Sets × Reps</div><div style="width:64px" class="sub">Rest</div><div style="width:34px"></div></div><div id="wbrows"></div><div class="chip-add" id="wbadd" style="margin-top:6px">+ Add exercise</div><button class="btn" id="wbsave" style="width:100%;justify-content:center;margin-top:16px">Save workout</button></div>';
+  const groupHTML=(b,gi)=>{
+    const exs=PROGRAMS[b]||[];
+    const rows=exs.map((ex,i)=>{
+      const cues=(ex.cues&&ex.cues.length)?'<br>✅ '+ex.cues.map(esc).join('  ·  '):'';
+      const detail='<div class="sub" style="font-size:.72rem;line-height:1.5;margin:1px 0 11px;color:var(--gray)">⏱ '+esc(ex.tempo||"controlled")+(ex.focus?'  ·  🎯 '+esc(ex.focus):'')+cues+'</div>';
+      return '<div class="row" style="gap:8px;margin-bottom:2px"><input value="'+esc(ex.n)+'" data-bg="'+gi+'" data-exi="'+i+'" data-f="n" placeholder="Exercise" style="flex:2;'+inp+'"><input value="'+esc(ex.s)+'" data-bg="'+gi+'" data-exi="'+i+'" data-f="s" placeholder="3 × 12" style="flex:1;'+inp+'"><input value="'+esc(ex.r)+'" data-bg="'+gi+'" data-exi="'+i+'" data-f="r" placeholder="90s" style="width:64px;'+inp+'"><button class="btn ghost sm" data-exdel="'+gi+':'+i+'" style="width:34px;padding:7px 0">✕</button></div>'+detail;
+    }).join("");
+    return '<div style="margin-top:16px"><div class="between"><h3 style="font-size:1.02rem">'+esc(b)+'</h3><span class="pill blue">'+exs.length+' exercises</span></div><p class="sub" style="margin:4px 0 12px">'+esc(GROUP_GOAL[b]||"")+'</p>'+rows+'<div class="chip-add" data-exadd="'+gi+'" style="margin-top:4px">+ Add exercise to '+esc(b)+'</div></div>';
+  };
+  ov.innerHTML='<div class="card pad" style="max-width:560px;width:100%;max-height:90vh;overflow:auto"><div class="between"><div><div class="eyebrow">Workout day</div><h3 style="margin-top:2px">'+blocks.map(esc).join(" + ")+' Day</h3></div><button class="signout" id="wbx" style="font-size:1.3rem">✕</button></div><p class="sub" style="margin:6px 0 4px">Full range, controlled reps, slow eccentrics. Edits update this program everywhere it\'s used.</p><div class="row" style="gap:8px;margin:14px 0 2px"><div style="flex:2" class="sub">Exercise</div><div style="flex:1" class="sub">Sets × Reps</div><div style="width:64px" class="sub">Rest</div><div style="width:34px"></div></div>'+blocks.map(groupHTML).join("")+'<button class="btn" id="wbsave" style="width:100%;justify-content:center;margin-top:18px">Save workout day</button></div>';
   document.body.appendChild(ov);
-  const rows=ov.querySelector("#wbrows");
-  const rowHTML=(ex,i)=>'<div class="row" style="gap:8px;margin-bottom:8px"><input value="'+(ex.n||"").replace(/"/g,"&quot;")+'" data-exn="'+i+'" placeholder="Exercise" style="flex:2;'+inp+'"><input value="'+(ex.s||"")+'" data-exs="'+i+'" placeholder="4 × 8" style="flex:1;'+inp+'"><input value="'+(ex.r||"")+'" data-exr="'+i+'" placeholder="90s" style="width:64px;'+inp+'"><button class="btn ghost sm" data-exdel="'+i+'" style="width:34px;padding:7px 0">✕</button></div>';
-  const paint=()=>{rows.innerHTML=PROGRAMS[block].map(rowHTML).join("");};
-  paint();
   const close=()=>ov.remove();
-  ov.addEventListener("input",ev=>{const t=ev.target;if(t.dataset.exn!=null)PROGRAMS[block][+t.dataset.exn].n=t.value;if(t.dataset.exs!=null)PROGRAMS[block][+t.dataset.exs].s=t.value;if(t.dataset.exr!=null)PROGRAMS[block][+t.dataset.exr].r=t.value;});
+  ov.addEventListener("input",ev=>{const t=ev.target;if(t.dataset.bg!=null&&t.dataset.exi!=null&&t.dataset.f){const arr=PROGRAMS[blocks[+t.dataset.bg]];if(arr&&arr[+t.dataset.exi])arr[+t.dataset.exi][t.dataset.f]=t.value;}});
   ov.addEventListener("click",ev=>{
     if(ev.target===ov||ev.target.closest("#wbx")){close();return;}
-    if(ev.target.closest("#wbadd")){PROGRAMS[block].push({n:"",s:"3 × 10",r:"90s"});paint();return;}
-    const del=ev.target.closest("[data-exdel]");if(del){PROGRAMS[block].splice(+del.dataset.exdel,1);paint();return;}
-    if(ev.target.closest("#wbsave")){close();toast("Workout saved ✓");render();return;}
+    const add=ev.target.closest("[data-exadd]");if(add){PROGRAMS[blocks[+add.dataset.exadd]].push({n:"",s:"3 × 12",r:"90s",tempo:"controlled",focus:"",cues:[]});ov.remove();openDay(blocks);return;}
+    const del=ev.target.closest("[data-exdel]");if(del){const p=del.dataset.exdel.split(":");PROGRAMS[blocks[+p[0]]].splice(+p[1],1);ov.remove();openDay(blocks);return;}
+    if(ev.target.closest("#wbsave")){close();toast("Workout day saved ✓");render();return;}
   });
 }
 function openAddClient(){
@@ -617,22 +666,42 @@ function openAddClient(){
 }
 function adminClientDetail(){
   const cl=DATA.clients.find(x=>x.n===state.client.n)||DATA.clients[0];
-  if(!cl.plan) cl.plan=Array.from({length:13},(_,i)=>({wk:i+1,block:((i+1)%4===0)?"Rest / Deload":(i<4?"Full Body A":i<8?"Upper Body":"Push")}));
-  if(!cl.stack) cl.stack=["Workout Program — Full Body 3×/wk","Nutrition Plan — "+cl.goal,"Habit Program — Steps & sleep","Check-in — Weekly"];
-  const phase=i=>i===0?'<div class="eyebrow" style="margin:16px 0 4px;color:var(--blue-600)">Foundation · Weeks 1–4</div>':i===4?'<div class="eyebrow" style="margin:18px 0 4px;color:var(--blue-600)">Build · Weeks 5–8</div>':i===8?'<div class="eyebrow" style="margin:18px 0 4px;color:var(--blue-600)">Peak · Weeks 9–13</div>':'';
+  if(!cl.days) cl.days=[
+    {d:"Day 1",block:"Chest",block2:"Triceps"},
+    {d:"Day 2",block:"Back",block2:"Biceps"},
+    {d:"Day 3",block:"Legs",block2:"Abs"},
+    {d:"Day 4",block:"Shoulders",block2:"Abs"},
+    {d:"Day 5",block:"Rest / Deload",block2:"None"}
+  ];
+  if(!cl.stack) cl.stack=["Workout Program — 5-day split","Nutrition Plan — "+cl.goal,"Habit Program — Steps & sleep","Check-in — Weekly"];
+  const selCss="padding:9px 11px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:.9rem;background:#fff";
+  const dayRow=(d,i)=>'<div class="list-item" style="padding:10px 0;gap:8px;flex-wrap:wrap;align-items:center">'
+    +'<div style="width:56px;font-weight:700;font-size:.9rem">'+d.d+'</div>'
+    +'<select data-dayblock="'+i+'" style="flex:1;min-width:104px;'+selCss+'">'+WORKOUT_BLOCKS.map(b=>'<option '+(b===d.block?'selected':'')+'>'+b+'</option>').join('')+'</select>'
+    +'<span class="sub" style="opacity:.55;font-weight:700">+</span>'
+    +'<select data-dayblock2="'+i+'" style="flex:1;min-width:104px;'+selCss+'">'+SECOND_BLOCKS.map(b=>'<option '+(b===(d.block2||"None")?'selected':'')+'>'+b+'</option>').join('')+'</select>'
+    +'<button class="btn ghost sm" data-editday="'+i+'" style="white-space:nowrap" title="Edit exercises">✎ Edit</button>'
+    +'<span class="h" data-delday="'+i+'" style="cursor:pointer;color:var(--red);padding:0 4px">✕</span></div>';
   return '<button class="btn ghost sm" data-back="1" style="margin-bottom:16px">← All clients</button>'
    +'<div class="grid g2" style="grid-template-columns:1fr 1.5fr;align-items:start">'
    +'<div><div class="card pad"><div class="row"><div class="avatar" style="width:52px;height:52px;font-size:1.1rem">'+cl.in+'</div><div><h3>'+cl.n+'</h3><div class="sub">'+cl.goal+' · '+cl.tier+'</div></div></div><div class="divide"></div><div class="between"><span class="sub">Adherence</span><b>'+cl.adh+'%</b></div><div class="progress" style="margin-top:6px"><i class="'+(cl.adh>80?'g':'')+'" style="width:'+cl.adh+'%"></i></div><button class="btn" style="width:100%;margin-top:16px">Message '+cl.n.split(' ')[0]+'</button></div>'
    +'<div class="card pad" style="margin-top:18px"><div class="eyebrow">Assigned stack</div><p class="sub" style="margin:6px 0 12px">Build their plan from your Stacks &amp; Programs.</p>'
    +cl.stack.map((s,i)=>'<div class="stack-mod">'+I.layers+'<span>'+s+'</span><span class="h" data-delcstack="'+i+'" style="cursor:pointer;color:var(--red)">✕</span></div>').join('')
    +'<div class="chip-add" data-addcstack="1">+ Add module</div></div></div>'
-   +'<div class="card pad"><div class="between"><div><div class="eyebrow">90-Day Program</div><h3 style="margin-top:4px">Week-by-week</h3></div><span class="pill blue">13 weeks</span></div>'
-   +cl.plan.map((w,i)=>phase(i)+'<div class="list-item" style="padding:8px 0"><div style="width:74px;font-weight:700;font-size:.9rem">Week '+w.wk+'</div><select data-weekplan="'+i+'" style="flex:1;padding:9px 11px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:.9rem;background:#fff">'+WORKOUT_BLOCKS.map(b=>'<option '+(b===w.block?'selected':'')+'>'+b+'</option>').join('')+'</select><button class="btn ghost sm" data-editwk="'+i+'" style="margin-left:8px;white-space:nowrap" title="Edit exercises">✎ Edit</button></div>').join('')
-   +'<button class="btn" style="width:100%;margin-top:16px" data-savestack="1">Save 90-day plan</button></div></div>';
+   +'<div class="card pad"><div class="between"><div><div class="eyebrow">Weekly training split</div><h3 style="margin-top:4px">Training days</h3></div><span class="pill blue">'+cl.days.length+' days</span></div>'
+   +'<p class="sub" style="margin:6px 0 12px">Free-combine any two muscle groups per day. Full exercises, tempo &amp; coaching cues are built in — tap ✎ Edit to fine-tune.</p>'
+   +cl.days.map(dayRow).join('')
+   +'<div class="chip-add" data-addday="1" style="margin-top:8px">+ Add training day</div>'
+   +'<button class="btn" style="width:100%;margin-top:14px" data-savestack="1">Save training plan</button></div></div>';
 }
 document.addEventListener("change",e=>{
-  const wp=e.target.closest("[data-weekplan]");
-  if(wp&&state.client){const cl=DATA.clients.find(x=>x.n===state.client.n);if(cl&&cl.plan)cl.plan[+wp.dataset.weekplan].block=wp.value;}
+  if(!state.client) return;
+  const cl=DATA.clients.find(x=>x.n===state.client.n);
+  if(!cl||!cl.days) return;
+  const p1=e.target.closest("[data-dayblock]");
+  if(p1){cl.days[+p1.dataset.dayblock].block=p1.value;return;}
+  const p2=e.target.closest("[data-dayblock2]");
+  if(p2){cl.days[+p2.dataset.dayblock2].block2=p2.value;return;}
 });
 document.addEventListener("click",e=>{
   const row=e.target.closest("[data-client]");
@@ -649,10 +718,13 @@ document.addEventListener("click",e=>{
   // stack builder
   if((el=e.target.closest("[data-addmod]"))){if(!state.currentStack.includes(el.dataset.addmod)){state.currentStack.push(el.dataset.addmod);render();toast("Module added to stack");}else{toast("Already in stack");}return;}
   if((el=e.target.closest("[data-rmmod]"))){state.currentStack.splice(+el.dataset.rmmod,1);render();return;}
-  if(e.target.closest("[data-savestack]")){toast(state.client?"90-day plan saved ✓":"Stack saved — pushed to 214 clients ✓");return;}
+  if(e.target.closest("[data-savestack]")){toast(state.client?"Training plan saved ✓":"Stack saved — pushed to 214 clients ✓");return;}
   if(e.target.closest("[data-addcstack]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl){const opts=DATA.stacks.map(s=>s+" — assigned");const pick=opts.find(o=>!cl.stack.includes(o))||("Custom module "+(cl.stack.length+1));cl.stack.push(pick);render();toast("Module added");}return;}
   if((el=e.target.closest("[data-delcstack]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl){cl.stack.splice(+el.dataset.delcstack,1);render();}return;}
-  if((el=e.target.closest("[data-editwk]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.plan){openWorkoutBuilder(cl.plan[+el.dataset.editwk].block);}return;}
+  if((el=e.target.closest("[data-editday]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.days){const d=cl.days[+el.dataset.editday];openDay([d.block,d.block2]);}return;}
+  if(e.target.closest("[data-addday]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.days){cl.days.push({d:"Day "+(cl.days.length+1),block:"Chest",block2:"None"});render();toast("Training day added");}return;}
+  if((el=e.target.closest("[data-delday]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.days){cl.days.splice(+el.dataset.delday,1);cl.days.forEach((d,ix)=>d.d="Day "+(ix+1));render();}return;}
+  if((el=e.target.closest("[data-libday]"))){openDay([el.dataset.libday]);return;}
   // admin: add / delete clients
   if(e.target.closest("[data-addclient-adm]")){ openAddClient(); return; }
   if((el=e.target.closest("[data-delclient]"))){
