@@ -701,11 +701,11 @@ function ensureCli(cl){
 function sparkline(vals,w,h,color){
   const min=Math.min(...vals),max=Math.max(...vals),rng=(max-min)||1;
   const pts=vals.map((v,i)=>{const x=(i/(vals.length-1))*(w-6)+3;const y=h-4-((v-min)/rng)*(h-8);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
-  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" style="max-width:100%"><polyline points="'+pts+'" fill="none" stroke="'+(color||'var(--blue-600)')+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" style="max-width:100%"><polyline points="'+pts+'" fill="none" stroke="'+(color||'#8b2fd6')+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
 function bars(vals,w,h,color){
   const min=Math.min(...vals)*0.92,max=Math.max(...vals),rng=(max-min)||1,bw=w/vals.length;
-  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+vals.map((v,i)=>{const bh=((v-min)/rng)*(h-4)+3;const x=i*bw+bw*0.18;return '<rect x="'+x.toFixed(1)+'" y="'+(h-bh).toFixed(1)+'" width="'+(bw*0.64).toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="2" fill="'+(color||'var(--blue-600)')+'"/>';}).join('')+'</svg>';
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+vals.map((v,i)=>{const bh=((v-min)/rng)*(h-4)+3;const x=i*bw+bw*0.18;return '<rect x="'+x.toFixed(1)+'" y="'+(h-bh).toFixed(1)+'" width="'+(bw*0.64).toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="2" fill="'+(color||'#8b2fd6')+'"/>';}).join('')+'</svg>';
 }
 function macroRow(label,cur,goal,color){
   const pct=Math.min(100,Math.round(cur/goal*100));
@@ -739,13 +739,13 @@ function adminClientDetail(){
   const progressTab=()=>'<div class="grid g2" style="align-items:start">'
     +'<div class="card pad"><div class="eyebrow">Body weight</div><div class="row" style="gap:26px;margin:10px 0 14px;flex-wrap:wrap">'
     +'<div><div class="sub">Start</div><b style="font-size:1.3rem">'+st.start+'</b></div>'
-    +'<div><div class="sub">Current</div><b style="font-size:1.3rem;color:var(--blue-600)">'+st.cur+'</b></div>'
+    +'<div><div class="sub">Current</div><b style="font-size:1.3rem;color:#8b2fd6">'+st.cur+'</b></div>'
     +'<div><div class="sub">Goal</div><b style="font-size:1.3rem">'+st.goal+'</b></div>'
     +'<div style="flex:1;text-align:right"><div class="sub">Change</div><b style="font-size:1.3rem;color:#16b8a6">'+(st.cur-st.start>0?'+':'')+(Math.round((st.cur-st.start)*10)/10)+' '+st.unit+'</b></div></div>'
     +sparkline(st.weights,340,96)
     +'<div class="sub" style="margin-top:6px">Last 10 weigh-ins · '+st.unit+'</div></div>'
     +'<div class="card pad"><div class="eyebrow">Measurements</div><p class="sub" style="margin:6px 0 8px">Change since start.</p>'
-    +st.meas.map(m=>'<div class="between" style="padding:10px 0;border-top:1px solid var(--line)"><span>'+m.n+'</span><span><b>'+m.v+'</b> &nbsp;<span class="sub" style="color:'+(m.d.charAt(0)==='-'?'#16b8a6':'var(--blue-600)')+'">'+m.d+' in</span></span></div>').join('')
+    +st.meas.map(m=>'<div class="between" style="padding:10px 0;border-top:1px solid var(--line)"><span>'+m.n+'</span><span><b>'+m.v+'</b> &nbsp;<span class="sub" style="color:'+(m.d.charAt(0)==='-'?'#16b8a6':'#8b2fd6')+'">'+m.d+' in</span></span></div>').join('')
     +'</div></div>';
   const nutritionTab=()=>'<div class="grid g2" style="align-items:start">'
     +'<div class="card pad"><div class="eyebrow">Daily targets</div>'
