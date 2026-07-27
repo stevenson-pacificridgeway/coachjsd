@@ -242,6 +242,47 @@ function applyUser(u){
     initials:(name.split(" ").map(x=>x[0]).slice(0,2).join("")||"U").toUpperCase() };
   IS_ADMIN = ADMIN_EMAILS.includes((u.email||"").toLowerCase());
 }
+/* ============ SHARED PERSISTENCE (all admins see & edit the same data) ============ */
+function playSaveSound(){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    const ctx=playSaveSound._c||(playSaveSound._c=new AC());
+    if(ctx.state==="suspended"){ try{ctx.resume();}catch(e){} }
+    const t0=ctx.currentTime;
+    [[784,0],[1046.5,0.085]].forEach(([f,d])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type="sine"; o.frequency.value=f; o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.0001,t0+d);
+      g.gain.exponentialRampToValueAtTime(0.16,t0+d+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+d+0.19);
+      o.start(t0+d); o.stop(t0+d+0.22);
+    });
+  }catch(e){}
+}
+function buildState(){ return { v:1, clients:DATA.clients, programs:PROGRAMS }; }
+let _saveTimer=null, _lastSaveOk=true;
+function saveState(){
+  if(!sb || !IS_ADMIN) return;
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(async ()=>{
+    try{
+      const { error } = await sb.from("coach_state").update({ data:buildState(), updated_at:new Date().toISOString(), updated_by:(AUTH_USER&&AUTH_USER.email)||"" }).eq("id",1);
+      if(error) throw error;
+      _lastSaveOk=true; playSaveSound(); toast("Saved ✓");
+    }catch(e){ _lastSaveOk=false; toast("Couldn't save — check connection"); }
+  }, 450);
+}
+async function loadState(){
+  if(!sb || !IS_ADMIN) return;
+  try{
+    const { data, error } = await sb.from("coach_state").select("data").eq("id",1).single();
+    if(!error && data && data.data){
+      const s=data.data;
+      if(Array.isArray(s.clients) && s.clients.length) DATA.clients=s.clients;
+      if(s.programs && typeof s.programs==="object") Object.assign(PROGRAMS, s.programs);
+    }
+  }catch(e){}
+}
 async function onSignedIn(session){
   state.loggedIn=true; state.client=null; applyUser(session.user);
   state.role = IS_ADMIN ? "admin" : "client";
@@ -250,6 +291,7 @@ async function onSignedIn(session){
   if(IS_ADMIN){
     try{ const { data } = await sb.from("profiles").select("*").order("created_at",{ascending:false}); MEMBERS = data||[]; }catch(e){}
     try{ const { data } = await sb.from("bookings").select("*").order("created_at",{ascending:false}); BOOKINGS = data||[]; }catch(e){}
+    await loadState();
   }
   render();
 }
@@ -636,7 +678,7 @@ function openDay(blocks){
     if(ev.target===ov||ev.target.closest("#wbx")){close();return;}
     const add=ev.target.closest("[data-exadd]");if(add){PROGRAMS[blocks[+add.dataset.exadd]].push({n:"",s:"3 × 12",r:"90s",tempo:"controlled",focus:"",cues:[]});ov.remove();openDay(blocks);return;}
     const del=ev.target.closest("[data-exdel]");if(del){const p=del.dataset.exdel.split(":");PROGRAMS[blocks[+p[0]]].splice(+p[1],1);ov.remove();openDay(blocks);return;}
-    if(ev.target.closest("#wbsave")){close();toast("Workout day saved ✓");render();return;}
+    if(ev.target.closest("#wbsave")){close();render();saveState();return;}
   });
 }
 function openAddClient(){
@@ -662,7 +704,7 @@ function openAddClient(){
     const goal=ov.querySelector("#acg").value,tier=ov.querySelector("#act").value,status=ov.querySelector("#acs").value;
     const ini=(name.split(/\s+/).map(x=>x[0]).slice(0,2).join("")||"C").toUpperCase();
     DATA.clients.unshift({n:name,in:ini,goal,adh:100,checkin:"just now",status,tier});
-    close();render();toast("Client added ✓");
+    close();render();saveState();
   };
 }
 function ensureCli(cl){
@@ -776,13 +818,13 @@ document.addEventListener("change",e=>{
   const cl=DATA.clients.find(x=>x.n===state.client.n);
   if(!cl||!cl.days) return;
   const p1=e.target.closest("[data-dayblock]");
-  if(p1){cl.days[+p1.dataset.dayblock].block=p1.value;return;}
+  if(p1){cl.days[+p1.dataset.dayblock].block=p1.value;saveState();return;}
   const p2=e.target.closest("[data-dayblock2]");
-  if(p2){cl.days[+p2.dataset.dayblock2].block2=p2.value;return;}
+  if(p2){cl.days[+p2.dataset.dayblock2].block2=p2.value;saveState();return;}
 });
 document.addEventListener("input",e=>{
   const t=e.target;
-  if(t&&t.matches&&t.matches("[data-cnote]")&&state.client){const cl=DATA.clients.find(x=>x.n===state.client.n);if(cl)cl.notes=t.value;}
+  if(t&&t.matches&&t.matches("[data-cnote]")&&state.client){const cl=DATA.clients.find(x=>x.n===state.client.n);if(cl){cl.notes=t.value;saveState();}}
 });
 document.addEventListener("click",e=>{
   const row=e.target.closest("[data-client]");
@@ -799,22 +841,22 @@ document.addEventListener("click",e=>{
   // stack builder
   if((el=e.target.closest("[data-addmod]"))){if(!state.currentStack.includes(el.dataset.addmod)){state.currentStack.push(el.dataset.addmod);render();toast("Module added to stack");}else{toast("Already in stack");}return;}
   if((el=e.target.closest("[data-rmmod]"))){state.currentStack.splice(+el.dataset.rmmod,1);render();return;}
-  if(e.target.closest("[data-savestack]")){toast(state.client?"Training plan saved ✓":"Stack saved — pushed to 214 clients ✓");return;}
-  if(e.target.closest("[data-addcstack]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl){const opts=DATA.stacks.map(s=>s+" — assigned");const pick=opts.find(o=>!cl.stack.includes(o))||("Custom module "+(cl.stack.length+1));cl.stack.push(pick);render();toast("Module added");}return;}
-  if((el=e.target.closest("[data-delcstack]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl){cl.stack.splice(+el.dataset.delcstack,1);render();}return;}
+  if(e.target.closest("[data-savestack]")){ if(state.client){saveState();} else {toast("Stack saved ✓");} return;}
+  if(e.target.closest("[data-addcstack]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl){const opts=DATA.stacks.map(s=>s+" — assigned");const pick=opts.find(o=>!cl.stack.includes(o))||("Custom module "+(cl.stack.length+1));cl.stack.push(pick);render();saveState();}return;}
+  if((el=e.target.closest("[data-delcstack]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl){cl.stack.splice(+el.dataset.delcstack,1);render();saveState();}return;}
   if((el=e.target.closest("[data-editday]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.days){const d=cl.days[+el.dataset.editday];openDay([d.block,d.block2]);}return;}
-  if(e.target.closest("[data-addday]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.days){cl.days.push({d:"Day "+(cl.days.length+1),block:"Chest",block2:"None"});render();toast("Training day added");}return;}
-  if((el=e.target.closest("[data-delday]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.days){cl.days.splice(+el.dataset.delday,1);cl.days.forEach((d,ix)=>d.d="Day "+(ix+1));render();}return;}
+  if(e.target.closest("[data-addday]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.days){cl.days.push({d:"Day "+(cl.days.length+1),block:"Chest",block2:"None"});render();toast("Training day added");saveState();}return;}
+  if((el=e.target.closest("[data-delday]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.days){cl.days.splice(+el.dataset.delday,1);cl.days.forEach((d,ix)=>d.d="Day "+(ix+1));render();saveState();}return;}
   if((el=e.target.closest("[data-libday]"))){openDay([el.dataset.libday]);return;}
   if((el=e.target.closest("[data-ctab]"))){state.ctab=el.dataset.ctab;render();return;}
-  if(e.target.closest("[data-addcheckin]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.checkins){cl.checkins.unshift({date:"Just now",w:cl.stats.cur,mood:8,note:"New check-in — add your notes."});render();toast("Check-in added");}return;}
-  if(e.target.closest("[data-addmeal]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.nutrition){cl.nutrition.meals.push("New meal — tap to edit");render();}return;}
+  if(e.target.closest("[data-addcheckin]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.checkins){cl.checkins.unshift({date:"Just now",w:cl.stats.cur,mood:8,note:"New check-in — add your notes."});render();toast("Check-in added");saveState();}return;}
+  if(e.target.closest("[data-addmeal]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.nutrition){cl.nutrition.meals.push("New meal — tap to edit");render();saveState();}return;}
   if(e.target.closest("[data-msg]")){toast("Opening message thread…");return;}
   // admin: add / delete clients
   if(e.target.closest("[data-addclient-adm]")){ openAddClient(); return; }
   if((el=e.target.closest("[data-delclient]"))){
     const i=+el.dataset.delclient; const nm=(DATA.clients[i]&&DATA.clients[i].n)||"this client";
-    if(confirm("Remove "+nm+"?")){ DATA.clients.splice(i,1); render(); toast("Client removed"); } return;
+    if(confirm("Remove "+nm+"?")){ DATA.clients.splice(i,1); render(); toast("Client removed"); saveState(); } return;
   }
   if((el=e.target.closest("[data-rmclient]"))){state.clientStack.splice(+el.dataset.rmclient,1);render();return;}
   if(e.target.closest("[data-addclient]")){const opts=["Mobility Program — 10 min daily","Supplement Guide — Cut phase","Challenge — 30-day steps","Recovery Program — Deload week"];const pick=opts.find(o=>!state.clientStack.includes(o))||opts[0];state.clientStack.push(pick);render();toast("Module added");return;}
