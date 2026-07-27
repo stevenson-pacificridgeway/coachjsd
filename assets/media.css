@@ -137,12 +137,12 @@ input:focus-visible, .faq-q:focus-visible {
 /* abstract athlete silhouette on the right + grid texture */
 .hero-figure {
   position: absolute; right: 0; bottom: 0; z-index: 2;
-  width: min(44vw, 600px); height: 100%;
+  width: min(46vw, 620px); height: 100%;
   background: url("img/hero-john-3.jpg") no-repeat center center;
   background-size: cover;
   opacity: 1;
   filter: brightness(1.08) contrast(1.05);
-  transform: scale(1.2) translateY(2.5%); transform-origin: right bottom;
+  transform: scale(1) translateY(0%); transform-origin: right bottom;
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 42%), linear-gradient(180deg, transparent 0%, #000 28%);
   -webkit-mask-composite: source-in;
   mask-image: linear-gradient(90deg, transparent 0%, #000 42%), linear-gradient(180deg, transparent 0%, #000 28%);
@@ -150,12 +150,12 @@ input:focus-visible, .faq-q:focus-visible {
 }
 .hero-figure-left {
   position: absolute; left: 0; bottom: 0; z-index: 2;
-  width: min(42vw, 560px); height: 100%;
+  width: min(46vw, 620px); height: 100%;
   background: url("img/hero-woman.jpg") no-repeat center center;
   background-size: cover;
   opacity: 1;
   filter: brightness(1.06) contrast(1.04);
-  transform: scale(0.9); transform-origin: left bottom;
+  transform: scale(1) translateY(0%); transform-origin: left bottom;
   -webkit-mask-image: linear-gradient(90deg, #000 56%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 28%);
   -webkit-mask-composite: source-in;
   mask-image: linear-gradient(90deg, #000 56%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 28%);
