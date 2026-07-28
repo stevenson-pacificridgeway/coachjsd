@@ -296,7 +296,7 @@ input:focus-visible, .faq-q:focus-visible {
 .bk-check { width: 62px; height: 62px; border-radius: 50%; background: #16b8a6; color: #fff; display: grid; place-items: center; font-size: 1.9rem; margin: 0 auto 16px; }
 
 /* Featured transformations band (transformations page) */
-.feat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 56px; }
+.feat { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 56px; }
 /* real photo coach portrait */
 .coach-portrait.photo::before, .coach-portrait.photo::after { display: none; }
 .coach-portrait.photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 22%; }
