@@ -45,8 +45,11 @@ const server = http.createServer((req, res) => {
       });
       return;
     }
-    const type = TYPES[path.extname(filePath)] || "application/octet-stream";
-    res.writeHead(200, { "Content-Type": type, "Cache-Control": "public, max-age=3600" }).end(data);
+    const ext = path.extname(filePath);
+    const type = TYPES[ext] || "application/octet-stream";
+    // Always-fresh code (revalidate); long cache for versioned media assets
+    const cache = [".html", ".css", ".js", ".json"].includes(ext) ? "no-cache" : "public, max-age=604800";
+    res.writeHead(200, { "Content-Type": type, "Cache-Control": cache }).end(data);
   });
 });
 
