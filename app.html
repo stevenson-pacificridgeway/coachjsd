@@ -799,10 +799,6 @@ function sparkline(vals,w,h,color){
   const pts=vals.map((v,i)=>{const x=(i/(vals.length-1))*(w-6)+3;const y=h-4-((v-min)/rng)*(h-8);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
   return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" style="max-width:100%"><polyline points="'+pts+'" fill="none" stroke="'+(color||'#8b2fd6')+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
-function bars(vals,w,h,color){
-  const min=Math.min(...vals)*0.92,max=Math.max(...vals),rng=(max-min)||1,bw=w/vals.length;
-  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+vals.map((v,i)=>{const bh=((v-min)/rng)*(h-4)+3;const x=i*bw+bw*0.18;return '<rect x="'+x.toFixed(1)+'" y="'+(h-bh).toFixed(1)+'" width="'+(bw*0.64).toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="2" fill="'+(color||'#8b2fd6')+'"/>';}).join('')+'</svg>';
-}
 function macroRow(label,cur,goal,color){
   const pct=Math.min(100,Math.round(cur/goal*100));
   return '<div style="margin-top:12px"><div class="between"><span class="sub">'+label+'</span><span class="sub"><b style="color:var(--ink)">'+cur+'g</b> / '+goal+'g</span></div><div class="progress" style="margin-top:5px"><i style="width:'+pct+'%;background:'+color+'"></i></div></div>';
