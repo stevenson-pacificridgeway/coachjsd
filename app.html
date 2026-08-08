@@ -160,12 +160,14 @@ const DATA = {
     macros:{cal:1790,calGoal:2100,p:165,c:180,f:55},
     habits:[{n:"10k steps",done:true},{n:"Sleep 7+ hrs",done:true},{n:"Log all meals",done:false},{n:"No late-night snacking",done:false}],
     appt:{when:"Thu, 2:30 PM",type:"Weekly video check-in"},
+    week:[{d:"Mon",n:"Upper Push",done:true},{d:"Tue",n:"Lower",done:true},{d:"Wed",n:"Rest",done:false},{d:"Thu",n:"Upper Pull",done:false},{d:"Fri",n:"Lower",done:false},{d:"Sat",n:"Conditioning",done:false},{d:"Sun",n:"Rest",done:false}],
+    thread:[{me:false,text:"Morning! How did yesterday's session feel?"},{me:true,text:"Felt strong — hit a new bench PR at 185!"},{me:false,text:"Great work hitting your protein all week 💪 Let's push a little harder on steps this weekend — you've got this."}],
     coachMsg:"Great work hitting your protein all week 💪 Let's push a little harder on steps this weekend — you've got this."},
   clients:[
     {n:"Alex Rivera",in:"AR",goal:"Fat loss",adh:92,checkin:"2h ago",status:"on-track",tier:"Hybrid"},
     {n:"Maria Chen",in:"MC",goal:"Muscle",adh:78,checkin:"1d ago",status:"on-track",tier:"Workout"},
     {n:"James Park",in:"JP",goal:"Fat loss",adh:64,checkin:"3d ago",status:"needs-nudge",tier:"Nutrition"},
-    {n:"Dana Kim",in:"DK",goal:"Recomp",adh:96,checkin:"5h ago",status:"on-track",tier:"Hybrid"},
+    {n:"Dana Kim",in:"DK",goal:"Muscle building",adh:96,checkin:"5h ago",status:"on-track",tier:"Hybrid"},
     {n:"Tom Ellis",in:"TE",goal:"Fat loss",adh:41,checkin:"6d ago",status:"at-risk",tier:"Hybrid"},
     {n:"Priya Shah",in:"PS",goal:"Toning",adh:88,checkin:"1d ago",status:"on-track",tier:"Nutrition"},
     {n:"Chris Vale",in:"CV",goal:"Performance",adh:83,checkin:"2d ago",status:"on-track",tier:"Workout"},
@@ -413,7 +415,7 @@ const CLIENT={
     <div class="grid g2" style="margin-top:18px;grid-template-columns:1.6fr 1fr">
       <div class="card pad">
         <div class="between"><div><div class="eyebrow">Today's workout · ${exDone}/${exTot} done</div><h3 style="margin-top:6px">${c.workout.name}</h3></div><span class="pill blue">${c.workout.dur}</span></div>
-        <div style="margin-top:14px">${c.workout.exercises.map((e,i)=>`<div class="task"><div class="check ${e.done?'done':''}" data-ex="${i}" style="cursor:pointer">${e.done?I.check:''}</div><div style="flex:1"><div style="font-weight:600;font-size:.9rem">${e.n}</div><div class="sub">${e.s} · rest ${e.r}</div></div></div>`).join("")}</div>
+        <div style="margin-top:14px">${c.workout.exercises.map((e,i)=>`<div class="task"><div class="check ${e.done?'done':''}" data-ex="${i}" style="cursor:pointer">${e.done?I.check:''}</div><div style="width:38px;height:38px;border-radius:10px;background:var(--blue-050);display:grid;place-items:center;flex-shrink:0"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8b2fd6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8v8"/><path d="M9 6v12"/><path d="M15 6v12"/><path d="M18 8v8"/><path d="M9 12h6"/></svg></div><div style="flex:1"><div style="font-weight:600;font-size:.9rem">${e.n}</div><div class="sub">${e.s} · rest ${e.r}</div></div></div>`).join("")}</div>
         <button class="btn" style="margin-top:16px;width:100%" data-complete-workout="1">${exDone===exTot?'✓ Workout complete':'Mark all complete'}</button>
       </div>
       <div>
@@ -430,7 +432,7 @@ const CLIENT={
     <div class="card pad">
       <div class="between"><h3>This week's program</h3><span class="pill blue">Hybrid · Week 6</span></div>
       <div class="divide"></div>
-      ${["Mon · Upper Push ✓","Tue · Lower ✓","Wed · Rest","Thu · Upper Pull","Fri · Lower","Sat · Conditioning","Sun · Rest"].map((d,i)=>`<div class="list-item"><div class="check ${i<2?'done':''}">${i<2?I.check:''}</div><div style="flex:1;font-weight:600;font-size:.92rem">${d.split(' · ')[1]}</div><div class="sub">${d.split(' · ')[0]}</div></div>`).join("")}
+      ${c.week.map((w,i)=>`<div class="list-item" data-weekday="${i}" style="cursor:pointer"><div class="check ${w.done?'done':''}">${w.done?I.check:''}</div><div style="flex:1;font-weight:600;font-size:.92rem">${w.n}</div><div class="sub">${w.d}</div></div>`).join("")}
     </div>
     <div class="card pad" style="margin-top:18px"><div class="eyebrow">Personal records</div>
       <div class="grid g3" style="margin-top:12px">
@@ -444,16 +446,19 @@ const CLIENT={
       </div>
     </div>
     <div class="card pad" style="margin-top:18px"><div class="eyebrow">Today's meals</div>
-      ${c.meals.map(m=>`<div class="list-item"><div class="check ${m.done?'done':''}">${m.done?I.check:''}</div><div style="flex:1;font-weight:600;font-size:.9rem">${m.n}</div><div class="sub">${m.k} kcal</div><button class="btn ghost sm">Swap</button></div>`).join("")}
-      <button class="btn ghost" style="margin-top:14px">Generate grocery list</button>
+      ${c.meals.map((m,i)=>`<div class="list-item"><div class="check ${m.done?'done':''}">${m.done?I.check:''}</div><div style="flex:1;font-weight:600;font-size:.9rem">${m.n}</div><div class="sub">${m.k} kcal</div><button class="btn ghost sm" data-swapmeal="${i}">Swap</button></div>`).join("")}
+      <button class="btn ghost" style="margin-top:14px" data-grocery="1">Generate grocery list</button>
     </div>`,
   progress:()=>`
     <div class="card pad"><div class="between"><div><div class="eyebrow">Body weight</div><h3 style="margin-top:6px">${c.curW} lb <span class="pill green" style="vertical-align:middle">▼ ${c.startW-c.curW} lb</span></h3></div><div class="seg"><button class="on">3M</button><button>6M</button><button>1Y</button></div></div>
       <div style="margin-top:14px">${line(c.weight)}</div>
       <div class="sub">Start ${c.startW} lb · Goal ${c.goalW} lb · ${Math.round((c.startW-c.curW)/(c.startW-c.goalW)*100)}% there</div>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)"><div class="eyebrow">Weekly weigh-in</div>
+        <div class="row" style="gap:8px;margin-top:10px"><input id="win" type="number" step="0.1" placeholder="Today's weight (lb)" style="flex:1;padding:11px 13px;border:1px solid var(--line);border-radius:11px;font-family:inherit;font-size:.92rem" onkeydown="if(event.key==='Enter'){event.preventDefault();var b=document.querySelector('[data-logweight]');if(b)b.click();}"><button class="btn" data-logweight="1" style="white-space:nowrap">Log weigh-in</button></div>
+      </div>
     </div>
     <div class="grid g2" style="margin-top:18px">
-      <div class="card pad"><div class="eyebrow">Weekly adherence</div><div style="margin-top:12px">${bars([82,88,79,91,86,94,92])}</div><div class="sub">Avg 87% · trending up</div></div>
+      <div class="card pad"><div class="eyebrow">Weekly adherence</div><div style="margin-top:12px">${bars([82,88,79,91,86,94,92],300,90)}</div><div class="sub">Avg 87% · trending up</div></div>
       <div class="card pad"><div class="eyebrow">Progress photos</div>
         <div class="grid g2" style="margin-top:12px;gap:10px">
           <div><div style="aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:#eef"><img src="assets/img/tx-man-before.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 15%"></div><div class="sub" style="text-align:center;margin-top:6px">Week 1</div></div>
@@ -473,12 +478,10 @@ const CLIENT={
 function msgView(who){return `
   <div class="card pad" style="display:flex;flex-direction:column;height:66vh">
     <div class="row" style="padding-bottom:12px;border-bottom:1px solid var(--line)"><div class="avatar">${who.split(' ').map(x=>x[0]).join('')}</div><div><div style="font-weight:700">${who}</div><div class="sub">● Online</div></div></div>
-    <div style="flex:1;overflow:auto;padding:16px 4px">
-      <div class="msg"><div class="avatar" style="width:28px;height:28px;font-size:.7rem">JS</div><div class="bubble">Morning! How did yesterday's session feel?</div></div>
-      <div class="msg me"><div class="bubble">Felt strong — hit a new bench PR at 185!</div></div>
-      <div class="msg"><div class="avatar" style="width:28px;height:28px;font-size:.7rem">JS</div><div class="bubble">${c.coachMsg}</div></div>
+    <div style="flex:1;overflow:auto;padding:16px 4px" id="msgscroll">
+      ${c.thread.map(m=>m.me?`<div class="msg me"><div class="bubble">${m.text}</div></div>`:`<div class="msg"><div class="avatar" style="width:28px;height:28px;font-size:.7rem">JS</div><div class="bubble">${m.text}</div></div>`).join("")}
     </div>
-    <div class="row" style="border-top:1px solid var(--line);padding-top:12px"><div class="search" style="flex:1;margin:0"><span>Type a message…</span></div><button class="btn">Send</button></div>
+    <div class="row" style="border-top:1px solid var(--line);padding-top:12px"><input id="msgin" placeholder="Type a message…" style="flex:1;padding:11px 14px;border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:.92rem" onkeydown="if(event.key==='Enter'){event.preventDefault();var b=document.querySelector('[data-send]');if(b)b.click();}"><button class="btn" data-send="1">Send</button></div>
   </div>`;}
 
 /* ============ COACH PAGES ============ */
@@ -681,8 +684,57 @@ function openDay(blocks){
     if(ev.target.closest("#wbsave")){close();render();saveState();return;}
   });
 }
+const SWAPS={
+  Breakfast:["Greek yogurt bowl","Oatmeal & berries","Egg-white omelette","Protein pancakes"],
+  Lunch:["Chicken & rice","Turkey wrap","Steak & quinoa","Tuna salad"],
+  Snack:["Protein shake","Apple & peanut butter","Cottage cheese & fruit","Trail mix"],
+  Dinner:["Salmon & greens","Chicken stir-fry","Lean beef & veg","Shrimp & rice"]
+};
+function swapMeal(i){
+  const m=c.meals[i];const pre=(m.n.split("—")[0]||"").trim();const cur=(m.n.split("—")[1]||"").trim();
+  const pool=(SWAPS[pre]||[]).filter(o=>o!==cur);
+  if(!pool.length){toast("No swap available");return;}
+  const pick=pool[Math.floor(Math.random()*pool.length)];
+  m.n=pre+" — "+pick;m.k=Math.max(150,m.k+Math.round(Math.random()*80-40));
+  render();toast("Meal swapped");
+}
+const GROCERY={
+  "Greek yogurt bowl":["Greek yogurt","Mixed berries","Granola","Honey"],
+  "Oatmeal & berries":["Rolled oats","Mixed berries","Almond milk"],
+  "Egg-white omelette":["Egg whites","Spinach","Bell pepper","Feta"],
+  "Protein pancakes":["Oat flour","Eggs","Protein powder","Banana"],
+  "Chicken & rice":["Chicken breast","White rice","Broccoli","Olive oil"],
+  "Turkey wrap":["Turkey slices","Whole-wheat wraps","Lettuce","Tomato"],
+  "Steak & quinoa":["Sirloin steak","Quinoa","Asparagus"],
+  "Tuna salad":["Canned tuna","Mixed greens","Cucumber","Greek yogurt"],
+  "Protein shake":["Whey protein","Banana","Almond milk"],
+  "Apple & peanut butter":["Apples","Peanut butter"],
+  "Cottage cheese & fruit":["Cottage cheese","Pineapple","Berries"],
+  "Trail mix":["Almonds","Cashews","Dried cranberries"],
+  "Salmon & greens":["Salmon fillet","Spinach","Asparagus","Lemon"],
+  "Chicken stir-fry":["Chicken breast","Mixed stir-fry veg","Soy sauce","Brown rice"],
+  "Lean beef & veg":["Lean ground beef","Zucchini","Bell pepper","Onion"],
+  "Shrimp & rice":["Shrimp","Jasmine rice","Peas","Garlic"]
+};
+function openGrocery(){
+  const seen={};const items=[];
+  c.meals.forEach(m=>{const name=(m.n.split("—")[1]||m.n).trim();const ing=GROCERY[name]||[name];ing.forEach(x=>{if(!seen[x]){seen[x]=1;items.push(x);}});});
+  const st="width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:.95rem;background:#fff;margin-top:6px";
+  const ov=document.createElement("div");
+  ov.style.cssText="position:fixed;inset:0;z-index:400;display:grid;place-items:center;background:rgba(10,13,20,.5);backdrop-filter:blur(6px);padding:20px";
+  ov.innerHTML='<div class="card pad" style="max-width:420px;width:100%;max-height:80vh;overflow:auto"><div class="between"><h3>Grocery list</h3><button class="signout" id="gcx" style="font-size:1.3rem">✕</button></div>'
+   +'<p class="sub" style="margin:4px 0 12px">From today\'s '+c.meals.length+' meals · '+items.length+' items</p>'
+   +'<div>'+items.map(x=>'<label class="list-item" style="cursor:pointer;gap:12px"><input type="checkbox" style="width:18px;height:18px;accent-color:#8b2fd6"><span style="font-weight:600;font-size:.92rem">'+x+'</span></label>').join('')+'</div>'
+   +'<button class="btn" id="gcc" style="width:100%;justify-content:center;margin-top:18px">Copy list</button></div>';
+  document.body.appendChild(ov);
+  const close=()=>ov.remove();
+  ov.addEventListener("click",ev=>{if(ev.target===ov)close();});
+  ov.querySelector("#gcx").onclick=close;
+  ov.querySelector("#gcc").onclick=()=>{const txt=items.map(x=>"• "+x).join("\n");if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>toast("Copied to clipboard ✓"),()=>toast("Copy not available"));}else{toast("Copy not available");}};
+}
 function openAddClient(){
-  const G=["Fat loss","Muscle building","Recomp","Toning","Athletic performance","General fitness","Lifestyle"];
+  const G=["Fat loss","Muscle building","Toning","Athletic performance","General fitness","Lifestyle"];
+  const G2=["None"].concat(G);
   const T=["Remote Coaching","In-Person 1×/week","In-Person 3×/week"];
   const S=[["on-track","On track"],["needs-nudge","Needs nudge"],["at-risk","At risk"]];
   const st="width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:.95rem;background:#fff;margin-top:6px";
@@ -690,7 +742,8 @@ function openAddClient(){
   ov.style.cssText="position:fixed;inset:0;z-index:400;display:grid;place-items:center;background:rgba(10,13,20,.5);backdrop-filter:blur(6px);padding:20px";
   ov.innerHTML='<div class="card pad" style="max-width:420px;width:100%"><div class="between"><h3>Add client</h3><button class="signout" id="acx" style="font-size:1.3rem">✕</button></div>'
    +'<label class="sub" style="display:block;margin-top:14px">Name</label><input id="acn" placeholder="Client name" style="'+st+'">'
-   +'<label class="sub" style="display:block;margin-top:14px">Goal</label><select id="acg" style="'+st+'">'+G.map(g=>'<option>'+g+'</option>').join('')+'</select>'
+   +'<label class="sub" style="display:block;margin-top:14px">Goal #1</label><select id="acg" style="'+st+'">'+G.map(g=>'<option>'+g+'</option>').join('')+'</select>'
+   +'<label class="sub" style="display:block;margin-top:14px">Goal #2</label><select id="acg2" style="'+st+'">'+G2.map(g=>'<option>'+g+'</option>').join('')+'</select>'
    +'<label class="sub" style="display:block;margin-top:14px">Coaching tier</label><select id="act" style="'+st+'">'+T.map(t=>'<option>'+t+'</option>').join('')+'</select>'
    +'<label class="sub" style="display:block;margin-top:14px">Status</label><select id="acs" style="'+st+'">'+S.map(s=>'<option value="'+s[0]+'">'+s[1]+'</option>').join('')+'</select>'
    +'<button class="btn" id="aca" style="width:100%;justify-content:center;margin-top:20px">Add client</button></div>';
@@ -701,7 +754,8 @@ function openAddClient(){
   ov.querySelector("#aca").onclick=()=>{
     const name=ov.querySelector("#acn").value.trim();
     if(!name){ov.querySelector("#acn").style.borderColor="#ff5a5f";return;}
-    const goal=ov.querySelector("#acg").value,tier=ov.querySelector("#act").value,status=ov.querySelector("#acs").value;
+    const goal1=ov.querySelector("#acg").value,goal2=ov.querySelector("#acg2").value,tier=ov.querySelector("#act").value,status=ov.querySelector("#acs").value;
+    const goal=(goal2&&goal2!=="None")?goal1+" + "+goal2:goal1;
     const ini=(name.split(/\s+/).map(x=>x[0]).slice(0,2).join("")||"C").toUpperCase();
     DATA.clients.unshift({n:name,in:ini,goal,adh:100,checkin:"just now",status,tier});
     close();render();saveState();
@@ -838,6 +892,11 @@ document.addEventListener("click",e=>{
   if((el=e.target.closest("[data-ex]"))){c.workout.exercises[+el.dataset.ex].done=!c.workout.exercises[+el.dataset.ex].done;render();return;}
   if(e.target.closest("[data-water]")){c.water.cur=Math.min(c.water.goal,Math.round((c.water.cur+0.25)*100)/100);render();return;}
   if(e.target.closest("[data-complete-workout]")){const all=c.workout.exercises.every(x=>x.done);c.workout.exercises.forEach(x=>x.done=!all);render();toast(all?'Workout reset':'Great work — workout logged 💪');return;}
+  if((el=e.target.closest("[data-weekday]"))){c.week[+el.dataset.weekday].done=!c.week[+el.dataset.weekday].done;render();return;}
+  if((el=e.target.closest("[data-swapmeal]"))){swapMeal(+el.dataset.swapmeal);return;}
+  if(e.target.closest("[data-grocery]")){openGrocery();return;}
+  if(e.target.closest("[data-logweight]")){const inp=document.getElementById("win");const v=parseFloat(inp&&inp.value);if(!v||v<50||v>700){if(inp)inp.style.borderColor="#ff5a5f";return;}c.weight.push(Math.round(v*10)/10);if(c.weight.length>12)c.weight.shift();c.curW=Math.round(v*10)/10;render();toast("Weigh-in logged ✓");return;}
+  if(e.target.closest("[data-send]")){const inp=document.getElementById("msgin");const v=(inp&&inp.value||"").trim();if(!v)return;c.thread.push({me:true,text:v.replace(/</g,"&lt;")});render();const sc=document.getElementById("msgscroll");if(sc)sc.scrollTop=sc.scrollHeight;const mi=document.getElementById("msgin");if(mi)mi.focus();setTimeout(()=>{c.thread.push({me:false,text:"Got it — thanks for the update! Keep it up 💪"});render();const s2=document.getElementById("msgscroll");if(s2)s2.scrollTop=s2.scrollHeight;},800);return;}
   // stack builder
   if((el=e.target.closest("[data-addmod]"))){if(!state.currentStack.includes(el.dataset.addmod)){state.currentStack.push(el.dataset.addmod);render();toast("Module added to stack");}else{toast("Already in stack");}return;}
   if((el=e.target.closest("[data-rmmod]"))){state.currentStack.splice(+el.dataset.rmmod,1);render();return;}
