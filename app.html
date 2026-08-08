@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Coach J. San Diego — Platform</title>
 <meta name="theme-color" content="#f5f7fb" />
+<meta name="description" content="Client dashboard for Coach J. San Diego coaching members — workouts, nutrition, progress and messages." />
+<meta name="robots" content="noindex, nofollow" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -327,23 +329,15 @@ function loginScreen(){
         <h2 style="text-align:center;font-size:1.5rem;margin:6px 0 4px">Welcome back</h2>
         <p class="sub" style="text-align:center;margin-bottom:22px">Sign in to your coaching dashboard</p>
         <button class="auth-btn" data-login="google"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.2-4.8 3.2-7.9z"/><path fill="#34A853" d="M12 23c2.9 0 5.4-1 7.2-2.7l-3.6-2.7c-1 .7-2.3 1.1-3.6 1.1-2.8 0-5.1-1.9-6-4.4H2.3v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M6 14.3a6.6 6.6 0 0 1 0-4.2V7.3H2.3a11 11 0 0 0 0 9.8z"/><path fill="#EA4335" d="M12 5.5c1.6 0 3 .5 4.1 1.6l3.1-3.1A11 11 0 0 0 2.3 7.3l3.7 2.8c.9-2.5 3.2-4.6 6-4.6z"/></svg> Continue with Google</button>
-        <button class="auth-btn" data-login="apple"><svg viewBox="0 0 24 24" width="17" height="17" fill="#000"><path d="M16.4 12.8c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 3 2.3 1.2-.05 1.6-.8 3-.8s1.8.8 3 .75c1.2-.02 2-1.1 2.8-2.2.9-1.3 1.2-2.5 1.3-2.6-.03-.01-2.4-.9-2.4-3.6zM14.2 5.7c.6-.8 1.1-1.9 1-3-.9.04-2 .6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .08 2-.5 2.7-1.3z"/></svg> Continue with Apple</button>
-        <div class="auth-or"><span>or</span></div>
-        <input class="auth-input" type="email" placeholder="you@email.com" value="alex@email.com" />
-        <input class="auth-input" type="password" placeholder="Password" value="········" />
-        <button class="btn" style="width:100%;justify-content:center" data-login="email">Sign in</button>
-        <div class="row" style="justify-content:space-between;margin-top:14px">
-          <button class="auth-link" data-login="magic">Email me a magic link</button>
-          <button class="auth-link">Forgot password?</button>
-        </div>
+        <p class="sub" style="text-align:center;margin-top:16px">Your coaching account uses Google sign-in — no extra password to remember.</p>
       </div>
       <p class="sub" style="text-align:center;margin-top:18px">New here? <a href="programs.html" style="color:var(--blue);font-weight:600">Explore coaching →</a></p>
     </div>`;
   document.querySelectorAll("[data-login]").forEach(b=>b.onclick=()=>{
     const k=b.dataset.login;
-    if(k==="magic"){toast("Magic link sent ✉️");return;}
     if(k==="google"){ signInGoogle(); return; }
-    state.loggedIn=true; render();   // apple / email: demo sign-in for now
+    if(!sb){ state.loggedIn=true; render(); return; }   // local preview only when Supabase isn't configured
+    toast("Please sign in with Google");
   });
 }
 
@@ -828,32 +822,51 @@ function adminClientDetail(){
     +'<div class="card pad" style="margin-top:18px"><div class="eyebrow">Recent progression</div><p class="sub" style="margin:6px 0 10px">Week-over-week on key lifts.</p>'
     +cl.prog.map(p=>'<div class="between" style="padding:9px 0;border-top:1px solid var(--line)"><div><b style="font-size:.9rem">'+p.lift+'</b><div class="sub">'+p.s[0]+' → '+p.s[p.s.length-1]+' lbs · +'+(p.s[p.s.length-1]-p.s[0])+'</div></div>'+bars(p.s,74,34)+'</div>').join('')
     +'</div></div></div>';
+  const numI=(path,val,w)=>'<input type="number" step="0.1" data-cf="'+path+'" value="'+val+'" style="width:'+(w||78)+'px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:1rem;font-weight:700">';
+  const txtI=(attr,val,extra)=>'<input type="text" '+attr+' value="'+String(val).replace(/"/g,'&quot;')+'" style="'+(extra||'flex:1;')+'padding:8px 10px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:.9rem">';
   const progressTab=()=>'<div class="grid g2" style="align-items:start">'
-    +'<div class="card pad"><div class="eyebrow">Body weight</div><div class="row" style="gap:26px;margin:10px 0 14px;flex-wrap:wrap">'
-    +'<div><div class="sub">Start</div><b style="font-size:1.3rem">'+st.start+'</b></div>'
-    +'<div><div class="sub">Current</div><b style="font-size:1.3rem;color:#8b2fd6">'+st.cur+'</b></div>'
-    +'<div><div class="sub">Goal</div><b style="font-size:1.3rem">'+st.goal+'</b></div>'
+    +'<div class="card pad"><div class="between"><div class="eyebrow">Body weight</div><span class="sub">editable</span></div><div class="row" style="gap:18px;margin:10px 0 14px;flex-wrap:wrap">'
+    +'<div><div class="sub">Start</div>'+numI('stats.start',st.start)+'</div>'
+    +'<div><div class="sub">Current</div>'+numI('stats.cur',st.cur)+'</div>'
+    +'<div><div class="sub">Goal</div>'+numI('stats.goal',st.goal)+'</div>'
     +'<div style="flex:1;text-align:right"><div class="sub">Change</div><b style="font-size:1.3rem;color:#16b8a6">'+(st.cur-st.start>0?'+':'')+(Math.round((st.cur-st.start)*10)/10)+' '+st.unit+'</b></div></div>'
     +sparkline(st.weights,340,96)
-    +'<div class="sub" style="margin-top:6px">Last 10 weigh-ins · '+st.unit+'</div></div>'
-    +'<div class="card pad"><div class="eyebrow">Measurements</div><p class="sub" style="margin:6px 0 8px">Change since start.</p>'
-    +st.meas.map(m=>'<div class="between" style="padding:10px 0;border-top:1px solid var(--line)"><span>'+m.n+'</span><span><b>'+m.v+'</b> &nbsp;<span class="sub" style="color:'+(m.d.charAt(0)==='-'?'#16b8a6':'#8b2fd6')+'">'+m.d+' in</span></span></div>').join('')
+    +'<div class="sub" style="margin-top:6px">Last '+st.weights.length+' weigh-ins · '+st.unit+'</div>'
+    +'<div class="row" style="gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)"><input type="number" step="0.1" id="awin" placeholder="New weigh-in ('+st.unit+')" style="flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:.92rem"><button class="btn" data-addweigh="1" style="white-space:nowrap">+ Log weigh-in</button></div></div>'
+    +'<div class="card pad"><div class="between"><div class="eyebrow">Measurements</div><span class="sub">editable</span></div><p class="sub" style="margin:6px 0 8px">Value and change since start.</p>'
+    +st.meas.map((m,i)=>'<div class="row" style="gap:6px;padding:9px 0;border-top:1px solid var(--line)">'
+      +txtI('data-cmeas="'+i+'" data-f="n"',m.n,'flex:1.1;')
+      +txtI('data-cmeas="'+i+'" data-f="v"',m.v,'width:86px;flex:0 0 86px;')
+      +txtI('data-cmeas="'+i+'" data-f="d"',m.d,'width:66px;flex:0 0 66px;')
+      +'<span class="h" data-delmeas="'+i+'" style="cursor:pointer;color:var(--red);padding:0 4px">✕</span></div>').join('')
+    +'<div class="chip-add" data-addmeas="1" style="margin-top:8px">+ Add measurement</div>'
     +'</div></div>';
+  const macroEdit=(label,curPath,curVal,goalPath,goalVal,unit,color)=>'<div style="margin-top:14px"><div class="between"><span>'+label+'</span><span class="row" style="gap:6px">'+numI(curPath,curVal,64)+'<span class="sub">/</span>'+numI(goalPath,goalVal,64)+'<span class="sub">'+unit+'</span></span></div>'
+    +'<div class="progress" style="margin-top:6px"><i style="width:'+Math.min(100,Math.round(curVal/(goalVal||1)*100))+'%;background:'+color+'"></i></div></div>';
   const nutritionTab=()=>'<div class="grid g2" style="align-items:start">'
-    +'<div class="card pad"><div class="eyebrow">Daily targets</div>'
-    +'<div class="between" style="margin-top:10px"><span>Calories</span><span><b>'+nu.cal+'</b> / '+nu.calGoal+' kcal</span></div>'
-    +'<div class="progress" style="margin-top:5px"><i style="width:'+Math.min(100,Math.round(nu.cal/nu.calGoal*100))+'%"></i></div>'
-    +macroRow('Protein',nu.p,nu.pG,'#8b2fd6')+macroRow('Carbs',nu.c,nu.cG,'#5a86ff')+macroRow('Fat',nu.f,nu.fG,'#16b8a6')
-    +'<div class="between" style="margin-top:16px"><span>Water</span><span><b>'+nu.water.cur+'</b> / '+nu.water.goal+' L</span></div>'
-    +'<div class="progress" style="margin-top:5px"><i class="g" style="width:'+Math.round(nu.water.cur/nu.water.goal*100)+'%"></i></div></div>'
-    +'<div class="card pad"><div class="eyebrow">Meal plan</div><p class="sub" style="margin:6px 0 8px">'+cl.goal+' · '+nu.calGoal+' kcal target</p>'
-    +nu.meals.map(m=>'<div class="list-item" style="padding:10px 0"><span>'+m+'</span></div>').join('')
+    +'<div class="card pad"><div class="between"><div class="eyebrow">Daily targets</div><span class="sub">editable</span></div>'
+    +macroEdit('Calories','nutrition.cal',nu.cal,'nutrition.calGoal',nu.calGoal,'kcal','#8b2fd6')
+    +macroEdit('Protein','nutrition.p',nu.p,'nutrition.pG',nu.pG,'g','#8b2fd6')
+    +macroEdit('Carbs','nutrition.c',nu.c,'nutrition.cG',nu.cG,'g','#5a86ff')
+    +macroEdit('Fat','nutrition.f',nu.f,'nutrition.fG',nu.fG,'g','#16b8a6')
+    +macroEdit('Water','nutrition.water.cur',nu.water.cur,'nutrition.water.goal',nu.water.goal,'L','#16b8a6')
+    +'</div>'
+    +'<div class="card pad"><div class="between"><div class="eyebrow">Meal plan</div><span class="sub">editable</span></div><p class="sub" style="margin:6px 0 8px">'+cl.goal+' · '+nu.calGoal+' kcal target</p>'
+    +nu.meals.map((m,i)=>'<div class="row" style="gap:6px;padding:8px 0;border-top:1px solid var(--line)">'
+      +txtI('data-cmeal="'+i+'"',m,'flex:1;')
+      +'<span class="h" data-delmeal="'+i+'" style="cursor:pointer;color:var(--red);padding:0 4px">✕</span></div>').join('')
     +'<div class="chip-add" data-addmeal="1" style="margin-top:6px">+ Add meal</div></div></div>';
   const checkinsTab=()=>'<div class="grid g2" style="grid-template-columns:1fr 1.2fr;align-items:start">'
     +'<div class="card pad"><div class="eyebrow">Coach notes</div><p class="sub" style="margin:6px 0 8px">Private — only you see this.</p>'
     +'<textarea data-cnote style="width:100%;min-height:150px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:.92rem;resize:vertical">'+(cl.notes||"").replace(/</g,"&lt;")+'</textarea></div>'
     +'<div class="card pad"><div class="between"><div class="eyebrow">Check-in history</div><button class="btn ghost sm" data-addcheckin="1">+ Add check-in</button></div>'
-    +cl.checkins.map(ci=>'<div style="padding:11px 0;border-top:1px solid var(--line)"><div class="between"><b>'+ci.date+'</b><span class="sub">'+ci.w+' lbs · mood '+ci.mood+'/10</span></div><p class="sub" style="margin-top:4px">'+ci.note+'</p></div>').join('')
+    +cl.checkins.map((ci,i)=>'<div style="padding:11px 0;border-top:1px solid var(--line)">'
+      +'<div class="row" style="gap:6px;flex-wrap:wrap">'
+      +txtI('data-cci="'+i+'" data-f="date"',ci.date,'flex:1.2;min-width:110px;')
+      +'<input type="number" step="0.1" data-cci="'+i+'" data-f="w" value="'+ci.w+'" style="width:74px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:.9rem">'
+      +'<input type="number" min="1" max="10" data-cci="'+i+'" data-f="mood" value="'+ci.mood+'" style="width:58px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:.9rem" title="Mood /10">'
+      +'<span class="h" data-delci="'+i+'" style="cursor:pointer;color:var(--red);padding:0 4px">✕</span></div>'
+      +'<textarea data-cci="'+i+'" data-f="note" style="width:100%;margin-top:6px;min-height:52px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:.88rem;resize:vertical">'+String(ci.note||"").replace(/</g,"&lt;")+'</textarea></div>').join('')
     +'</div></div>';
   const body={training:trainingTab,progress:progressTab,nutrition:nutritionTab,checkins:checkinsTab}[ctab]();
   const tabs=[['training','Training'],['progress','Progress'],['nutrition','Nutrition'],['checkins','Check-ins']];
@@ -872,9 +885,16 @@ document.addEventListener("change",e=>{
   const p2=e.target.closest("[data-dayblock2]");
   if(p2){cl.days[+p2.dataset.dayblock2].block2=p2.value;saveState();return;}
 });
+function setPath(obj,path,val){const p=path.split(".");let o=obj;for(let i=0;i<p.length-1;i++){if(o[p[i]]==null)o[p[i]]={};o=o[p[i]];}o[p[p.length-1]]=val;}
 document.addEventListener("input",e=>{
-  const t=e.target;
-  if(t&&t.matches&&t.matches("[data-cnote]")&&state.client){const cl=DATA.clients.find(x=>x.n===state.client.n);if(cl){cl.notes=t.value;saveState();}}
+  const t=e.target; if(!t||!t.matches) return;
+  if(t.matches("[data-cnote]")&&state.client){const cl=DATA.clients.find(x=>x.n===state.client.n);if(cl){cl.notes=t.value;saveState();}return;}
+  if(!state.client) return;
+  const cl=DATA.clients.find(x=>x.n===state.client.n); if(!cl) return;
+  if(t.matches("[data-cf]")){const v=parseFloat(t.value);if(!isNaN(v)){setPath(cl,t.dataset.cf,v);saveState();}return;}
+  if(t.matches("[data-cmeas]")){const m=cl.stats.meas[+t.dataset.cmeas];if(m){m[t.dataset.f]=t.value;saveState();}return;}
+  if(t.matches("[data-cmeal]")){cl.nutrition.meals[+t.dataset.cmeal]=t.value;saveState();return;}
+  if(t.matches("[data-cci]")){const ci=cl.checkins[+t.dataset.cci];if(ci){const f=t.dataset.f;ci[f]=(f==="w"||f==="mood")?(parseFloat(t.value)||0):t.value;saveState();}return;}
 });
 document.addEventListener("click",e=>{
   const row=e.target.closest("[data-client]");
@@ -906,6 +926,14 @@ document.addEventListener("click",e=>{
   if((el=e.target.closest("[data-ctab]"))){state.ctab=el.dataset.ctab;render();return;}
   if(e.target.closest("[data-addcheckin]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.checkins){cl.checkins.unshift({date:"Just now",w:cl.stats.cur,mood:8,note:"New check-in — add your notes."});render();toast("Check-in added");saveState();}return;}
   if(e.target.closest("[data-addmeal]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.nutrition){cl.nutrition.meals.push("New meal — tap to edit");render();saveState();}return;}
+  if((el=e.target.closest("[data-delmeal]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.nutrition){cl.nutrition.meals.splice(+el.dataset.delmeal,1);render();saveState();}return;}
+  if(e.target.closest("[data-addweigh]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));const inp=document.getElementById("awin");const v=parseFloat(inp&&inp.value);
+    if(!cl||!v||v<50||v>700){if(inp)inp.style.borderColor="#ff5a5f";return;}
+    const w=Math.round(v*10)/10; cl.stats.weights.push(w); if(cl.stats.weights.length>14)cl.stats.weights.shift(); cl.stats.cur=w;
+    render();toast("Weigh-in logged ✓");saveState();return;}
+  if(e.target.closest("[data-addmeas]")){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.stats){cl.stats.meas.push({n:"New measurement",v:"0.0 in",d:"0.0"});render();saveState();}return;}
+  if((el=e.target.closest("[data-delmeas]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.stats){cl.stats.meas.splice(+el.dataset.delmeas,1);render();saveState();}return;}
+  if((el=e.target.closest("[data-delci]"))){const cl=DATA.clients.find(x=>x.n===(state.client&&state.client.n));if(cl&&cl.checkins){cl.checkins.splice(+el.dataset.delci,1);render();saveState();}return;}
   if(e.target.closest("[data-msg]")){toast("Opening message thread…");return;}
   // admin: add / delete clients
   if(e.target.closest("[data-addclient-adm]")){ openAddClient(); return; }
