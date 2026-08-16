@@ -95,3 +95,26 @@
   /* Current year in footer */
   document.querySelectorAll("[data-year]").forEach((el) => (el.textContent = new Date().getFullYear()));
 })();
+
+/* Before/after slider — drag or tap anywhere on a real-photo card */
+(function () {
+  document.querySelectorAll(".ba.photo").forEach(function (ba) {
+    var dragging = false;
+    function setSplit(clientX) {
+      var r = ba.getBoundingClientRect();
+      var pct = ((clientX - r.left) / r.width) * 100;
+      pct = Math.max(0, Math.min(100, pct));
+      ba.style.setProperty("--split", pct + "%");
+    }
+    ba.addEventListener("pointerdown", function (e) {
+      dragging = true;
+      try { ba.setPointerCapture(e.pointerId); } catch (err) {}
+      setSplit(e.clientX);
+      e.preventDefault();
+    });
+    ba.addEventListener("pointermove", function (e) { if (dragging) setSplit(e.clientX); });
+    ["pointerup", "pointercancel", "pointerleave"].forEach(function (ev) {
+      ba.addEventListener(ev, function () { dragging = false; });
+    });
+  });
+})();
