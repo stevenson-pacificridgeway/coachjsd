@@ -18,7 +18,7 @@
     '<input name="email" type="email" placeholder="Email" required>' +
     '<input name="phone" type="tel" placeholder="Phone (optional)">' +
     '<select name="goal"><option value="">Your main goal…</option><option>Fat loss</option><option>Build muscle</option><option>General fitness</option><option>Athletic performance</option></select>' +
-    '<select name="tier"><option value="">Interested in…</option><option>Remote Coaching ($250/mo)</option><option>In-Person 1x/week ($500/mo)</option><option>In-Person 3x/week ($1,000/mo)</option><option>Not sure yet</option></select>' +
+    '<select name="tier"><option value="">Interested in…</option><option>Remote Coaching ($250/mo)</option><option>In-Person 2x/week ($500/mo)</option><option>In-Person 3x/week ($1,000/mo)</option><option>Not sure yet</option></select>' +
     '<textarea name="message" placeholder="Anything else? (optional)" rows="3"></textarea>' +
     '<button type="submit" class="btn btn-primary btn-lg bk-submit">Request my consultation</button>' +
     '</form></div>' +
